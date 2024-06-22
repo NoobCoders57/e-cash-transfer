@@ -10,6 +10,7 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven { url 'https://repo.eclipse.org/content/groups/jetty_io/' }
+        maven { url 'https://plugins.gradle.org/m2/' }
     }
 }
 
