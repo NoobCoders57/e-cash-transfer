@@ -1,17 +1,17 @@
 package org.example.servlets;
 
-import org.example.models.client;
-import org.example.DAO.ClientDao;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.dao.ClientDao;
+import org.example.models.Client;
+
 import java.io.IOException;
-import java.sql.*;
-import java.util.ArrayList;
+import java.sql.SQLException;
 import java.util.List;
 
-public class clientServlet extends HttpServlet {
+public class ClientServlet extends HttpServlet {
 
     private ClientDao clientDAO;
 
@@ -55,7 +55,7 @@ public class clientServlet extends HttpServlet {
     }
 
     private void listClients(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
-        List<client> listClients = clientDAO.listAllClients();
+        List<Client> listClients = clientDAO.listAllClients();
         request.setAttribute("listClients", listClients);
         request.getRequestDispatcher("/client/list.jsp").forward(request, response);
     }
@@ -66,33 +66,29 @@ public class clientServlet extends HttpServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         String numtel = request.getParameter("numtel");
-        client existingClient = clientDAO.getClient(numtel);
+        Client existingClient = clientDAO.getClient(numtel);
         request.setAttribute("client", existingClient);
         request.getRequestDispatcher("/client/form.jsp").forward(request, response);
     }
 
     private void insertClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        String numtel = request.getParameter("numtel");
-        String nom = request.getParameter("nom");
-        String sexe = request.getParameter("sexe");
-        String pays = request.getParameter("pays");
-        int solde = Integer.parseInt(request.getParameter("solde"));
-        String mail = request.getParameter("mail");
-
-        client newClient = new client(numtel, nom, sexe, pays, solde, mail);
+        Client newClient = getClientFromParams(request);
         clientDAO.insertClient(newClient);
         response.sendRedirect("client");
     }
 
-    private void updateClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+    private Client getClientFromParams(HttpServletRequest request) {
         String numtel = request.getParameter("numtel");
         String nom = request.getParameter("nom");
         String sexe = request.getParameter("sexe");
         String pays = request.getParameter("pays");
         int solde = Integer.parseInt(request.getParameter("solde"));
         String mail = request.getParameter("mail");
+        return new Client(numtel, nom, sexe, pays, solde, mail);
+    }
 
-        client client = new client(numtel, nom, sexe, pays, solde, mail);
+    private void updateClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        Client client = getClientFromParams(request);
         clientDAO.updateClient(client);
         response.sendRedirect("client");
     }

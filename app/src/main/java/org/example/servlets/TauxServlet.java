@@ -1,20 +1,18 @@
 package org.example.servlets;
 
-import org.example.DAO.TauxDao;
-import org.example.models.taux;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.dao.TauxDao;
+import org.example.models.Taux;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
-public class tauxServlet {
+public class TauxServlet {
     private TauxDao tauxDAO;
-    
+
     public void init() {
         tauxDAO = new TauxDao();
     }
@@ -53,7 +51,7 @@ public class tauxServlet {
     }
 
     private void listTaux(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
-        List<taux> listTaux = tauxDAO.listAllTaux();
+        List<Taux> listTaux = tauxDAO.listAllTaux();
         request.setAttribute("listTaux", listTaux);
         request.getRequestDispatcher("/taux/list.jsp").forward(request, response);
     }
@@ -64,7 +62,7 @@ public class tauxServlet {
 
     private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
         int idtaux = Integer.parseInt(request.getParameter("idtaux"));
-        taux existingTaux = tauxDAO.getTaux(idtaux);
+        Taux existingTaux = tauxDAO.getTaux(idtaux);
         request.setAttribute("taux", existingTaux);
         request.getRequestDispatcher("/taux/form.jsp").forward(request, response);
     }
@@ -73,7 +71,7 @@ public class tauxServlet {
         int montant1 = Integer.parseInt(request.getParameter("montant1"));
         int montant2 = Integer.parseInt(request.getParameter("montant2"));
 
-        taux newTaux = new taux(montant1, montant2);
+        Taux newTaux = new Taux(montant1, montant2);
         tauxDAO.insertTaux(newTaux);
         response.sendRedirect("taux");
     }
@@ -83,7 +81,7 @@ public class tauxServlet {
         int montant1 = Integer.parseInt(request.getParameter("montant1"));
         int montant2 = Integer.parseInt(request.getParameter("montant2"));
 
-        taux taux = new taux(montant1, montant2);
+        Taux taux = new Taux(montant1, montant2);
         tauxDAO.updateTaux(taux);
         response.sendRedirect("taux");
     }

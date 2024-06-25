@@ -1,20 +1,22 @@
-package org.example.DAO;
+package org.example.dao;
 
-import org.example.models.client;
+import org.example.models.Client;
+import org.example.util.Config;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ClientDao {
     private Connection connect() throws SQLException {
-        String url = "jdbc:postgresql://localhost:5432/cash";
-        String user = "postgres";
-        String password = "mario123";
+        String url = Config.get("db.url");
+        String user = Config.get("db.user");
+        String password = Config.get("db.password");
         return DriverManager.getConnection(url, user, password);
     }
 
-    public List<client> listAllClients() throws SQLException {
-        List<client> listClients = new ArrayList<>();
+    public List<Client> listAllClients() throws SQLException {
+        List<Client> listClients = new ArrayList<>();
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT * FROM CLIENT")) {
@@ -25,27 +27,26 @@ public class ClientDao {
                 String pays = rs.getString("pays");
                 int solde = rs.getInt("solde");
                 String mail = rs.getString("mail");
-                listClients.add(new client(numtel, nom, sexe, pays, solde, mail));
+                listClients.add(new Client(numtel, nom, sexe, pays, solde, mail));
             }
         }
         return listClients;
     }
 
-    public void insertClient(client client) throws SQLException {
-        try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement("INSERT INTO CLIENT (numtel, nom, sexe, pays, solde, mail) VALUES (?, ?, ?, ?, ?, ?)")) {
-            pstmt.setString(1, client.getNumtel());
-            pstmt.setString(2, client.getNom());
-            pstmt.setString(3, client.getSexe());
-            pstmt.setString(4, client.getPays());
-            pstmt.setInt(5, client.getSolde());
-            pstmt.setString(6, client.getMail());
+    public void insertClient(Client client) throws SQLException {
+        try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement("INSERT INTO CLIENT (numtel, nom, sexe, pays, solde, mail) VALUES (?, ?, ?, ?, ?, ?)")) {
+            pstmt.setString(1, client.numtel());
+            pstmt.setString(2, client.nom());
+            pstmt.setString(3, client.sexe());
+            pstmt.setString(4, client.pays());
+            pstmt.setInt(5, client.solde());
+            pstmt.setString(6, client.mail());
             pstmt.executeUpdate();
         }
     }
 
-    public client getClient(String numtel) throws SQLException {
-        client client = null;
+    public Client getClient(String numtel) throws SQLException {
+        Client client = null;
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM CLIENT WHERE numtel = ?")) {
             pstmt.setString(1, numtel);
@@ -56,21 +57,21 @@ public class ClientDao {
                 String pays = rs.getString("pays");
                 int solde = rs.getInt("solde");
                 String mail = rs.getString("mail");
-                client = new client(numtel, nom, sexe, pays, solde, mail);
+                client = new Client(numtel, nom, sexe, pays, solde, mail);
             }
         }
         return client;
     }
 
-    public void updateClient(client client) throws SQLException {
+    public void updateClient(Client client) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET nom = ?, sexe = ?, pays = ?, solde = ?, mail = ? WHERE numtel = ?")) {
-            pstmt.setString(1, client.getNom());
-            pstmt.setString(2, client.getSexe());
-            pstmt.setString(3, client.getPays());
-            pstmt.setInt(4, client.getSolde());
-            pstmt.setString(5, client.getMail());
-            pstmt.setString(6, client.getNumtel());
+            pstmt.setString(1, client.nom());
+            pstmt.setString(2, client.sexe());
+            pstmt.setString(3, client.pays());
+            pstmt.setInt(4, client.solde());
+            pstmt.setString(5, client.mail());
+            pstmt.setString(6, client.numtel());
             pstmt.executeUpdate();
         }
     }

@@ -1,19 +1,17 @@
 package org.example.servlets;
 
-import org.example.DAO.EnvoyerDao;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.example.dao.EnvoyerDao;
 import org.example.models.Envoyer;
 
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
 
-public class envoyerServlet {
+public class EnvoyerServlet {
 
     private EnvoyerDao envoyerDAO;
 

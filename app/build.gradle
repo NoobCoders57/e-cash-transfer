@@ -18,11 +18,15 @@ repositories {
 }
 
 dependencies {
-    // This dependency is used by the application.
-    implementation libs.guava
-    compileOnly 'javax.servlet:javax.servlet-api:4.0.1'
-    compileOnly 'javax.servlet.jsp:jsp-api:2.2'
-    implementation 'javax.servlet:jstl:1.2'
+    implementation 'jakarta.servlet:jakarta.servlet-api:4.0.3'
+    implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:2.3.6'
+    implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
+
+    // Add JUnit Jupiter API for writing tests
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
+
+    // Add JUnit Jupiter Engine for running tests
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 }
 
 sourceSets {
@@ -31,6 +35,10 @@ sourceSets {
             srcDirs = ['src/main/webapp']
         }
     }
+}
+
+test {
+    useJUnitPlatform()
 }
 
 // Apply a specific Java toolchain to ease working on different environments.
