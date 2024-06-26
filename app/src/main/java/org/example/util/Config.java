@@ -7,7 +7,7 @@ public class Config {
 
     static {
         try {
-            properties.load(Config.class.getResourceAsStream("config.properties"));
+            properties.load(Thread.currentThread().getContextClassLoader().getResourceAsStream("config.properties"));
         } catch (Exception e) {
             throw new RuntimeException("Could not load config.properties file", e);
         }

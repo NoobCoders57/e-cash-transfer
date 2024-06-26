@@ -22,6 +22,7 @@ dependencies {
     implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:2.3.6'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
     implementation 'javax.mail:mail:1.4'
+    implementation 'org.postgresql:postgresql:42.7.3'
 
     // Add JUnit Jupiter API for writing tests
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
@@ -33,7 +34,7 @@ dependencies {
 sourceSets {
     main {
         resources {
-            srcDirs = ['src/main/webapp']
+            srcDirs = ['src/main/webapp', 'src/main/resources']
         }
     }
 }
