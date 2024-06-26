@@ -1,6 +1,7 @@
 package org.example.servlets;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+@WebServlet("/client")
 public class ClientServlet extends HttpServlet {
 
     private ClientDao clientDAO;
@@ -54,10 +56,19 @@ public class ClientServlet extends HttpServlet {
         }
     }
 
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        try {
+            insertClient(req, resp);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void listClients(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
         List<Client> listClients = clientDAO.listAllClients();
         request.setAttribute("listClients", listClients);
-        request.getRequestDispatcher("/client/list.jsp").forward(request, response);
+        request.getRequestDispatcher("client.jsp").forward(request, response);
     }
 
     private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

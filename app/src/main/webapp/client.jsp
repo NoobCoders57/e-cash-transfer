@@ -7,7 +7,6 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:import url="org/example/servlets/ClientServlet.java" var="ClientServlet" />
 
 <!DOCTYPE html>
 <html>
@@ -39,15 +38,17 @@
         <tbody>
         <c:forEach var="client" items="${listClients}">
             <tr>
-                <td>${client.numtel}</td>
-                <td>${client.nom}</td>
-                <td>${client.sexe}</td>
-                <td>${client.pays}</td>
-                <td>${client.solde}</td>
-                <td>${client.mail}</td>
+                <td>${client.numtel()}</td>
+                <td>${client.nom()}</td>
+                <td>${client.sexe()}</td>
+                <td>${client.pays()}</td>
+                <td>${client.solde()}</td>
+                <td>${client.mail()}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm edit-btn" data-id="${client.numtel}" data-toggle="modal" data-target="#clientModal">Edit</button>
-                    <a href="client?action=delete&numtel=${client.numtel}" class="btn btn-danger btn-sm">Delete</a>
+                    <button class="btn btn-warning btn-sm edit-btn" data-id="${client.numtel()}" data-toggle="modal"
+                            data-target="#clientModal">Edit
+                    </button>
+                    <a href="client?action=delete&numtel=${client.numtel()}" class="btn btn-danger btn-sm">Delete</a>
                 </td>
             </tr>
         </c:forEach>
@@ -108,11 +109,11 @@
 </div>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         // Open modal for editing
-        $('.edit-btn').on('click', function() {
+        $('.edit-btn').on('click', function () {
             var numtel = $(this).data('id');
-            $.get('client?action=edit&numtel=' + numtel, function(data) {
+            $.get('client?action=edit&numtel=' + numtel, function (data) {
                 $('#formAction').val('update');
                 $('#numtel').val(data.numtel).prop('readonly', true);
                 $('#nom').val(data.nom);
@@ -131,7 +132,7 @@
         });
 
         // Save client form
-        $('#saveClientBtn').on('click', function() {
+        $('#saveClientBtn').on('click', function () {
             $('#clientForm').submit();
         });
     });
