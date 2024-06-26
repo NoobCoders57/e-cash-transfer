@@ -1,25 +1,27 @@
 package org.example.dao;
 
+import org.example.connection.ConnectionProvider;
 import org.example.models.Client;
-import org.example.util.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientDao {
-    private Connection connect() throws SQLException {
-        String url = Config.get("db.url");
-        String user = Config.get("db.user");
-        String password = Config.get("db.password");
-        return DriverManager.getConnection(url, user, password);
+public class ClientDao extends AbstractDao {
+    public ClientDao(ConnectionProvider connectionProvider) {
+        super(connectionProvider);
+    }
+
+    public ClientDao() {
+        super();
     }
 
     public List<Client> listAllClients() throws SQLException {
         List<Client> listClients = new ArrayList<>();
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM CLIENT")) {
+             ResultSet rs = stmt.executeQuery("SELECT * FROM CLIENT")
+        ) {
             while (rs.next()) {
                 String numtel = rs.getString("numtel");
                 String nom = rs.getString("nom");

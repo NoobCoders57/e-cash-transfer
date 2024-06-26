@@ -1,18 +1,19 @@
 package org.example.dao;
 
+import org.example.connection.ConnectionProvider;
 import org.example.models.Taux;
-import org.example.util.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TauxDao {
-    private Connection connect() throws SQLException {
-        String url = Config.get("db.url");
-        String user = Config.get("db.user");
-        String password = Config.get("db.password");
-        return DriverManager.getConnection(url, user, password);
+public class TauxDao extends AbstractDao {
+    public TauxDao() {
+        super();
+    }
+
+    public TauxDao(ConnectionProvider connectionProvider) {
+        super(connectionProvider);
     }
 
     public List<Taux> listAllTaux() throws SQLException {
