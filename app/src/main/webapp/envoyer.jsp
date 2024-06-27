@@ -77,11 +77,12 @@
                 <form id="envoyerForm" action="envoyer" method="post">
                     <input type="hidden" id="formAction" name="action" value="insert">
                     <input type="hidden" id="idenv" name="idenv">
+                    <input type="hidden" id="soldeEnvoyeur" name="soldeEnvoyeur">
                     <div class="form-group">
                         <label for="numEnvoyeur">Num Envoyeur:</label>
                         <select class="form-control" id="numEnvoyeur" name="numEnvoyeur" required>
                             <c:forEach var="client" items="${listClients}">
-                                <option value="<c:out value='${client.numtel()}'/>"><c:out value='${client.nom()}'/></option>
+                                <option data-solde="<c:out value='${client.solde()}'/>" value="<c:out value='${client.numtel()}'/>"><c:out value='${client.nom()}'/></option>
                             </c:forEach>
                         </select>
                     </div>
@@ -157,7 +158,7 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
-                <p>Le solde de l'envoyeur est insuffisant pour effectuer cette transaction.</p>
+                <p>Le solde est insuffisant pour effectuer cette transaction.</p>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -172,6 +173,9 @@
         // Filtrer les options du récepteur en fonction de l'envoyeur sélectionné
         $('#numEnvoyeur').on('change', function() {
             var selectedEnvoyeur = $(this).val();
+            var selectedSolde = $(this).find('option:selected').data('solde');
+            $('#soldeEnvoyeur').val(selectedSolde);
+
             $('#numRecepteur option').each(function() {
                 if ($(this).val() === selectedEnvoyeur) {
                     $(this).prop('disabled', true);
@@ -191,11 +195,17 @@
             $('#montant').val(button.data('montant'));
             $('#date').val(button.data('date'));
             $('#raison').val(button.data('raison'));
+
+            // Mettre à jour le solde de l'envoyeur
+            var selectedSolde = $('#numEnvoyeur').find('option:selected').data('solde');
+            $('#soldeEnvoyeur').val(selectedSolde);
         });
 
         function checkSoldeAndSubmit() {
             var montant = parseInt($('#montant').val());
             var soldeEnvoyeur = parseInt($('#soldeEnvoyeur').val());
+
+            console.log($('#soldeEnvoyeur').val());
 
             // Vérifier si le montant est supérieur au solde de l'envoyeur
             if (montant > soldeEnvoyeur) {
@@ -216,7 +226,7 @@
 
         // Soumettre le formulaire envoyer
         $('#saveEnvoyerBtn').on('click', function() {
-            $('#envoyerForm').submit();
+            checkSoldeAndSubmit();
         });
 
         // Afficher la boîte de dialogue de confirmation de suppression

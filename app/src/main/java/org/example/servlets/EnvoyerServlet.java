@@ -114,7 +114,7 @@ public class EnvoyerServlet extends HttpServlet {
     }
 
     private void updateEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int idEnv = Integer.parseInt(request.getParameter("idEnv"));
+        int idEnv = Integer.parseInt(request.getParameter("idenv"));
         String numEnvoyeur = request.getParameter("numEnvoyeur");
         String numRecepteur = request.getParameter("numRecepteur");
         int montant = Integer.parseInt(request.getParameter("montant"));
@@ -148,7 +148,7 @@ public class EnvoyerServlet extends HttpServlet {
     }
 
     private void deleteEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int idEnv = Integer.parseInt(request.getParameter("idEnv"));
+        int idEnv = Integer.parseInt(request.getParameter("idenv"));
         Envoyer envoyer = envoyerDAO.getEnvoyer(idEnv);
         if (envoyer == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid envoyer ID");
