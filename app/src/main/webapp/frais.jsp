@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: mario
-  Date: 25/06/2024
-  Time: 08:18
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <!DOCTYPE html>
@@ -35,13 +28,26 @@
         <tbody>
         <c:forEach var="frais" items="${listFrais}">
             <tr>
-                <td>${frais.idfrais}</td>
-                <td>${frais.montant1}</td>
-                <td>${frais.montant2}</td>
-                <td>${frais.frais}</td>
+                <td><c:out value="${frais.idFrais()}"/></td>
+                <td><c:out value="${frais.montant1()}"/></td>
+                <td><c:out value="${frais.montant2()}"/></td>
+                <td><c:out value="${frais.frais()}"/></td>
                 <td>
-                    <button class="btn btn-warning btn-sm edit-btn" data-id="${frais.idfrais}" data-toggle="modal" data-target="#fraisModal">Edit</button>
-                    <a href="frais?action=delete&idfrais=${frais.idfrais}" class="btn btn-danger btn-sm">Delete</a>
+                    <button class="btn btn-warning btn-sm edit-btn"
+                            data-idfrais="<c:out value='${frais.idFrais()}'/>"
+                            data-montant1="<c:out value='${frais.montant1()}'/>"
+                            data-montant2="<c:out value='${frais.montant2()}'/>"
+                            data-frais="<c:out value='${frais.frais()}'/>"
+                            data-toggle="modal"
+                            data-target="#fraisModal">
+                        Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-btn"
+                            data-idfrais="<c:out value='${frais.idFrais()}'/>"
+                            data-toggle="modal"
+                            data-target="#deleteConfirmationModal">
+                        Delete
+                    </button>
                 </td>
             </tr>
         </c:forEach>
@@ -90,33 +96,68 @@
     </div>
 </div>
 
+<!-- Modal for Delete Confirmation -->
+<div class="modal fade" id="deleteConfirmationModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation de suppression</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <p>Are you sure you want to delete this Frais?</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <form id="deleteForm" action="frais" method="post">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" id="deleteIdfrais" name="idfrais">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function() {
-        // Open modal for editing
+        // Ouvrir le formulaire modal pour l'édition
         $('.edit-btn').on('click', function() {
-            var idfrais = $(this).data('id');
-            $.get('frais?action=edit&idfrais=' + idfrais, function(data) {
-                $('#formAction').val('update');
-                $('#idfrais').val(data.idfrais);
-                $('#montant1').val(data.montant1);
-                $('#montant2').val(data.montant2);
-                $('#frais').val(data.frais);
-            });
+            const button = $(this);
+            $('#formAction').val('update');
+            $('#idfrais').val(button.data('idfrais'));
+            $('#montant1').val(button.data('montant1'));
+            $('#montant2').val(button.data('montant2'));
+            $('#frais').val(button.data('frais'));
         });
 
-        // Clear form on modal close
+        // Réinitialiser le formulaire modal à sa fermeture
         $('#fraisModal').on('hidden.bs.modal', function () {
             $('#fraisForm')[0].reset();
             $('#formAction').val('insert');
             $('#idfrais').val('');
         });
 
-        // Save frais form
+        // Soumettre le formulaire frais
         $('#saveFraisBtn').on('click', function() {
             $('#fraisForm').submit();
         });
+
+        // Afficher la boîte de dialogue de confirmation de suppression
+        $('.delete-btn').on('click', function() {
+            const button = $(this);
+            const idfrais = button.data('idfrais');
+            $('#deleteIdfrais').val(idfrais);
+        });
     });
+
 </script>
 </body>
 </html>
-

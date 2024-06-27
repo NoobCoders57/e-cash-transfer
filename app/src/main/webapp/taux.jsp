@@ -34,12 +34,24 @@
         <tbody>
         <c:forEach var="taux" items="${listTaux}">
             <tr>
-                <td>${taux.idTaux}</td>
-                <td>${taux.montant1}</td>
-                <td>${taux.montant2}</td>
+                <td>${taux.idTaux()}</td>
+                <td>${taux.montant1()}</td>
+                <td>${taux.montant2()}</td>
                 <td>
-                    <button class="btn btn-warning btn-sm edit-btn" data-id="${taux.idTaux}" data-toggle="modal" data-target="#tauxModal">Edit</button>
-                    <a href="taux?action=delete&idTaux=${taux.idTaux}" class="btn btn-danger btn-sm">Delete</a>
+                    <button class="btn btn-warning btn-sm edit-btn"
+                            data-id="${taux.idTaux()}"
+                            data-montant1="${taux.montant1()}"
+                            data-montant2="${taux.montant2()}"
+                            data-toggle="modal"
+                            data-target="#tauxModal">
+                        Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-btn"
+                            data-id="${taux.idTaux()}"
+                            data-toggle="modal"
+                            data-target="#deleteConfirmationModal">
+                        Delete
+                    </button>
                 </td>
             </tr>
         </c:forEach>
@@ -62,17 +74,14 @@
             <div class="modal-body">
                 <form id="tauxForm" action="taux" method="post">
                     <input type="hidden" id="formAction" name="action" value="insert">
-                    <div class="form-group">
-                        <label for="idTaux">IdTaux:</label>
-                        <input type="text" class="form-control" id="idTaux" name="idTaux">
-                    </div>
+                    <input type="hidden" id="idTaux" name="idTaux">
                     <div class="form-group">
                         <label for="montant1">Montant1:</label>
-                        <input type="number" class="form-control" id="montant1" name="montant1">
+                        <input type="number" class="form-control" id="montant1" name="montant1" required>
                     </div>
                     <div class="form-group">
                         <label for="montant2">Montant2:</label>
-                        <input type="number" class="form-control" id="montant2" name="montant2">
+                        <input type="number" class="form-control" id="montant2" name="montant2" required>
                     </div>
                 </form>
             </div>
@@ -87,32 +96,65 @@
     </div>
 </div>
 
+<!-- Modal for Delete Confirmation -->
+<div class="modal fade" id="deleteConfirmationModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation de suppression</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer ce taux?</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <form id="deleteForm" action="taux" method="post">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" id="deleteIdTaux" name="idTaux">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function() {
-        // Open modal for editing
+        // Ouvrir le formulaire modal pour l'édition
         $('.edit-btn').on('click', function() {
-            var idTaux = $(this).data('id');
-            $.get('taux?action=edit&idTaux=' + idTaux, function(data) {
-                $('#formAction').val('update');
-                $('#idTaux').val(data.idTaux);
-                $('#montant1').val(data.montant1);
-                $('#montant2').val(data.montant2);
-            });
+            const button = $(this);
+            $('#formAction').val('update');
+            $('#idTaux').val(button.data('id'));
+            $('#montant1').val(button.data('montant1'));
+            $('#montant2').val(button.data('montant2'));
         });
 
-        // Clear form on modal close
+        // Réinitialiser le formulaire modal à sa fermeture
         $('#tauxModal').on('hidden.bs.modal', function () {
             $('#tauxForm')[0].reset();
             $('#formAction').val('insert');
             $('#idTaux').val('');
         });
 
-        // Save taux form
+        // Soumettre le formulaire de taux
         $('#saveTauxBtn').on('click', function() {
             $('#tauxForm').submit();
+        });
+
+        // Afficher la boîte de dialogue de confirmation de suppression
+        $('.delete-btn').on('click', function() {
+            const button = $(this);
+            $('#deleteIdTaux').val(button.data('id'));
         });
     });
 </script>
 </body>
 </html>
-

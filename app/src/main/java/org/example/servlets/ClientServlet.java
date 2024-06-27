@@ -30,26 +30,10 @@ public class ClientServlet extends HttpServlet {
         }
 
         try {
-            switch (action) {
-                case "new":
-                    showNewForm(request, response);
-                    break;
-                case "insert":
-                    insertClient(request, response);
-                    break;
-                case "delete":
-                    deleteClient(request, response);
-                    break;
-                case "edit":
-                    showEditForm(request, response);
-                    break;
-                case "update":
-                    updateClient(request, response);
-                    break;
-                case "list":
-                default:
-                    listClients(request, response);
-                    break;
+            if ("list".equals(action)) {
+                listClients(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -57,11 +41,20 @@ public class ClientServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
         try {
-            insertClient(req, resp);
+            if ("insert".equals(action)) {
+                insertClient(request, response);
+            } else if ("update".equals(action)) {
+                updateClient(request, response);
+            } else if ("delete".equals(action)) {
+                deleteClient(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            throw new ServletException(e);
         }
     }
 
@@ -69,17 +62,6 @@ public class ClientServlet extends HttpServlet {
         List<Client> listClients = clientDAO.listAllClients();
         request.setAttribute("listClients", listClients);
         request.getRequestDispatcher("client.jsp").forward(request, response);
-    }
-
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/client/form.jsp").forward(request, response);
-    }
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
-        String numtel = request.getParameter("numtel");
-        Client existingClient = clientDAO.getClient(numtel);
-        request.setAttribute("client", existingClient);
-        request.getRequestDispatcher("/client/form.jsp").forward(request, response);
     }
 
     private void insertClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
