@@ -1,6 +1,7 @@
 package org.example.servlets;
 
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +12,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
+@WebServlet("/client")
 public class ClientServlet extends HttpServlet {
 
     private ClientDao clientDAO;
@@ -28,26 +30,28 @@ public class ClientServlet extends HttpServlet {
         }
 
         try {
-            switch (action) {
-                case "new":
-                    showNewForm(request, response);
-                    break;
-                case "insert":
-                    insertClient(request, response);
-                    break;
-                case "delete":
-                    deleteClient(request, response);
-                    break;
-                case "edit":
-                    showEditForm(request, response);
-                    break;
-                case "update":
-                    updateClient(request, response);
-                    break;
-                case "list":
-                default:
-                    listClients(request, response);
-                    break;
+            if ("list".equals(action)) {
+                listClients(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
+            }
+        } catch (SQLException e) {
+            throw new ServletException(e);
+        }
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        try {
+            if ("insert".equals(action)) {
+                insertClient(request, response);
+            } else if ("update".equals(action)) {
+                updateClient(request, response);
+            } else if ("delete".equals(action)) {
+                deleteClient(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -57,18 +61,7 @@ public class ClientServlet extends HttpServlet {
     private void listClients(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ServletException {
         List<Client> listClients = clientDAO.listAllClients();
         request.setAttribute("listClients", listClients);
-        request.getRequestDispatcher("/client/list.jsp").forward(request, response);
-    }
-
-    private void showNewForm(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        request.getRequestDispatcher("/client/form.jsp").forward(request, response);
-    }
-
-    private void showEditForm(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
-        String numtel = request.getParameter("numtel");
-        Client existingClient = clientDAO.getClient(numtel);
-        request.setAttribute("client", existingClient);
-        request.getRequestDispatcher("/client/form.jsp").forward(request, response);
+        request.getRequestDispatcher("client.jsp").forward(request, response);
     }
 
     private void insertClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
@@ -88,8 +81,9 @@ public class ClientServlet extends HttpServlet {
     }
 
     private void updateClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+        String originalNumtel = request.getParameter("originalNumtel");
         Client client = getClientFromParams(request);
-        clientDAO.updateClient(client);
+        clientDAO.updateClient(originalNumtel, client);
         response.sendRedirect("client");
     }
 

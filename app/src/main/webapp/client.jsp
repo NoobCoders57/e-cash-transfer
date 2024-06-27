@@ -7,7 +7,6 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
-<c:import url="org/example/servlets/ClientServlet.java" var="ClientServlet" />
 
 <!DOCTYPE html>
 <html>
@@ -27,7 +26,7 @@
     <table class="table table-striped mt-3">
         <thead>
         <tr>
-            <th>Numtel</th>
+            <th>Téléphone</th>
             <th>Nom</th>
             <th>Sexe</th>
             <th>Pays</th>
@@ -39,15 +38,31 @@
         <tbody>
         <c:forEach var="client" items="${listClients}">
             <tr>
-                <td>${client.numtel}</td>
-                <td>${client.nom}</td>
-                <td>${client.sexe}</td>
-                <td>${client.pays}</td>
-                <td>${client.solde}</td>
-                <td>${client.mail}</td>
+                <td><c:out value="${client.numtel()}"/></td>
+                <td><c:out value="${client.nom()}"/></td>
+                <td><c:out value="${client.sexe()}"/></td>
+                <td><c:out value="${client.pays()}"/></td>
+                <td><c:out value="${client.solde()}"/></td>
+                <td><c:out value="${client.mail()}"/></td>
                 <td>
-                    <button class="btn btn-warning btn-sm edit-btn" data-id="${client.numtel}" data-toggle="modal" data-target="#clientModal">Edit</button>
-                    <a href="client?action=delete&numtel=${client.numtel}" class="btn btn-danger btn-sm">Delete</a>
+                    <button class="btn btn-warning btn-sm edit-btn"
+                            data-numtel="<c:out value='${client.numtel()}'/>"
+                            data-nom="<c:out value='${client.nom()}'/>"
+                            data-sexe="<c:out value='${client.sexe()}'/>"
+                            data-pays="<c:out value='${client.pays()}'/>"
+                            data-solde="<c:out value='${client.solde()}'/>"
+                            data-mail="<c:out value='${client.mail()}'/>"
+                            data-toggle="modal"
+                            data-target="#clientModal">
+                        Edit
+                    </button>
+                    <button class="btn btn-danger btn-sm delete-btn"
+                            data-numtel="<c:out value='${client.numtel()}'/>"
+                            data-nom="<c:out value='${client.nom()}'/>"
+                            data-toggle="modal"
+                            data-target="#deleteConfirmationModal">
+                        Delete
+                    </button>
                 </td>
             </tr>
         </c:forEach>
@@ -70,29 +85,30 @@
             <div class="modal-body">
                 <form id="clientForm" action="client" method="post">
                     <input type="hidden" id="formAction" name="action" value="insert">
+                    <input type="hidden" id="originalNumtel" name="originalNumtel">
                     <div class="form-group">
-                        <label for="numtel">Numtel:</label>
-                        <input type="text" class="form-control" id="numtel" name="numtel">
+                        <label for="numtel">Téléphone:</label>
+                        <input type="text" class="form-control" id="numtel" name="numtel" required>
                     </div>
                     <div class="form-group">
                         <label for="nom">Nom:</label>
-                        <input type="text" class="form-control" id="nom" name="nom">
+                        <input type="text" class="form-control" id="nom" name="nom" required>
                     </div>
                     <div class="form-group">
                         <label for="sexe">Sexe:</label>
-                        <input type="text" class="form-control" id="sexe" name="sexe">
+                        <input type="text" class="form-control" id="sexe" name="sexe" required>
                     </div>
                     <div class="form-group">
                         <label for="pays">Pays:</label>
-                        <input type="text" class="form-control" id="pays" name="pays">
+                        <input type="text" class="form-control" id="pays" name="pays" required>
                     </div>
                     <div class="form-group">
                         <label for="solde">Solde:</label>
-                        <input type="number" class="form-control" id="solde" name="solde">
+                        <input type="number" class="form-control" id="solde" name="solde" required>
                     </div>
                     <div class="form-group">
                         <label for="mail">Mail:</label>
-                        <input type="email" class="form-control" id="mail" name="mail">
+                        <input type="email" class="form-control" id="mail" name="mail" required>
                     </div>
                 </form>
             </div>
@@ -107,34 +123,74 @@
     </div>
 </div>
 
+<!-- Modal for Delete Confirmation -->
+<div class="modal fade" id="deleteConfirmationModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmation de suppression</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir supprimer le client : <span id="clientNameToDelete"></span>?</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <form id="deleteForm" action="client" method="post">
+                    <input type="hidden" name="action" value="delete">
+                    <input type="hidden" id="deleteNumtel" name="numtel">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript pour la confirmation de suppression -->
 <script>
     $(document).ready(function() {
-        // Open modal for editing
+        // Ouvrir le formulaire modal pour l'édition
         $('.edit-btn').on('click', function() {
-            var numtel = $(this).data('id');
-            $.get('client?action=edit&numtel=' + numtel, function(data) {
-                $('#formAction').val('update');
-                $('#numtel').val(data.numtel).prop('readonly', true);
-                $('#nom').val(data.nom);
-                $('#sexe').val(data.sexe);
-                $('#pays').val(data.pays);
-                $('#solde').val(data.solde);
-                $('#mail').val(data.mail);
-            });
+            const button = $(this);
+            $('#formAction').val('update');
+            $('#originalNumtel').val(button.data('numtel'));
+            $('#numtel').val(button.data('numtel'));
+            $('#nom').val(button.data('nom'));
+            $('#sexe').val(button.data('sexe'));
+            $('#pays').val(button.data('pays'));
+            $('#solde').val(button.data('solde'));
+            $('#mail').val(button.data('mail'));
         });
 
-        // Clear form on modal close
+        // Réinitialiser le formulaire modal à sa fermeture
         $('#clientModal').on('hidden.bs.modal', function () {
             $('#clientForm')[0].reset();
             $('#formAction').val('insert');
             $('#numtel').prop('readonly', false);
         });
 
-        // Save client form
+        // Soumettre le formulaire client
         $('#saveClientBtn').on('click', function() {
             $('#clientForm').submit();
         });
+
+        // Afficher la boîte de dialogue de confirmation de suppression
+        $('.delete-btn').on('click', function() {
+            const button = $(this);
+            const numtel = button.data('numtel');
+            const nom = button.data('nom');
+            $('#clientNameToDelete').text(nom);
+            $('#deleteNumtel').val(numtel);
+        });
     });
+
 </script>
 </body>
 </html>
