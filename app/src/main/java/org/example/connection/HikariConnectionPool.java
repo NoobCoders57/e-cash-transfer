@@ -17,7 +17,7 @@ public class HikariConnectionPool implements ConnectionProvider {
         CONFIG.setJdbcUrl(Config.get("db.url"));
         CONFIG.setUsername(Config.get("db.user"));
         CONFIG.setPassword(Config.get("db.password"));
-        CONFIG.setMaximumPoolSize(10);
+        CONFIG.setMaximumPoolSize(Integer.parseInt(Config.get("db.pool.size")));
     }
 
     public HikariConnectionPool() {

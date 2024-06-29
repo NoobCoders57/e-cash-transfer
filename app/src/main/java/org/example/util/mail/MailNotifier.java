@@ -3,9 +3,12 @@ package org.example.util.mail;
 import org.example.dao.ClientDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
+import org.example.util.interfaces.ClientProvider;
 import org.example.util.interfaces.MailCompleteListener;
+import org.example.util.interfaces.MailSender;
 import org.example.util.interfaces.ObservableMailNotifier;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -17,6 +20,8 @@ import java.util.logging.Logger;
  * Notification of the two parties involved in the transaction by e-mail
  */
 public class MailNotifier implements ObservableMailNotifier {
+    private final MailSender mailer;
+
     /**
      * Parties involved in the transaction
      */
@@ -46,21 +51,35 @@ public class MailNotifier implements ObservableMailNotifier {
     }
 
     /**
-     * Constructor
+     * Create a new MailNotifier with the given transaction, client provider and mailer
      *
-     * @param transaction Transaction data
+     * @param transaction    Transaction to be notified
+     * @param clientProvider Provider of clients
+     * @param mailer         Mailer to send emails
+     * @throws SQLException If a database access error occurs
+     */
+    public MailNotifier(@NotNull Envoyer transaction, @Nullable ClientProvider clientProvider, @Nullable MailSender mailer) throws SQLException {
+        this.transaction = transaction;
+        this.mailer = mailer != null ? mailer : new Mailer();
+        ClientProvider provider = clientProvider != null ? clientProvider : numtel -> new ClientDao().getClient(numtel);
+        this.clients.put(Party.CASH_RECEIVER, provider.getClient(transaction.numRecepteur()));
+        this.clients.put(Party.CASH_SENDER, provider.getClient(transaction.numEnvoyeur()));
+    }
+
+    /**
+     * Create a new MailNotifier with the given transaction a default client provider and a default mailer
+     *
+     * @param transaction Transaction to be notified
      * @throws SQLException If a database access error occurs
      */
     public MailNotifier(@NotNull Envoyer transaction) throws SQLException {
-        this.transaction = transaction;
-        ClientDao clientDao = new ClientDao();
-        this.clients.put(Party.CASH_RECEIVER, clientDao.getClient(transaction.numRecepteur()));
-        this.clients.put(Party.CASH_SENDER, clientDao.getClient(transaction.numEnvoyeur()));
+        this(transaction, null, null);
     }
 
     /**
      * Email one of parties involved in the transaction in a separate thread
      * Notify the listeners when the email sending is complete (whether it was successful or not)
+     *
      * @param party Party to be notified
      */
     public void notify(Party party) {
@@ -72,11 +91,8 @@ public class MailNotifier implements ObservableMailNotifier {
                         transaction,
                         clients.get(Party.CASH_SENDER),
                         clients.get(Party.CASH_RECEIVER)
-                ).buildMessage(
-                        messageType,
-                        "templates/mail/cash-%s.html".formatted(party.value())
-                );
-                new Mailer().send("Rapport de transaction", message, mail);
+                ).buildMessage(messageType);
+                mailer.send("Rapport de transaction", message, mail);
                 notifySendListener(EventType.SEND_SUCCESS, "Email sent to " + mail);
                 Logger.getLogger("MailNotifier").info("Email sent to " + mail);
             } catch (MessagingException | IOException e) {
@@ -92,7 +108,10 @@ public class MailNotifier implements ObservableMailNotifier {
      */
     @Override
     public void notifySendListener(EventType type, String message) {
-        mailCompleteListener.get(type).onComplete(message);
+        MailCompleteListener listener = mailCompleteListener.get(type);
+        if (listener != null) {
+            listener.onComplete(message);
+        }
     }
 
     /**
@@ -100,8 +119,10 @@ public class MailNotifier implements ObservableMailNotifier {
      * @param listener Listener to be notified
      */
     @Override
-    public void setSendListener(EventType type, MailCompleteListener listener) {
-        mailCompleteListener.put(type, listener);
+    public void setSendListener(EventType type, @NotNull MailCompleteListener listener) {
+        if (type != null) {
+            mailCompleteListener.put(type, listener);
+        }
     }
 
     /**
@@ -110,14 +131,14 @@ public class MailNotifier implements ObservableMailNotifier {
      */
     @Override
     public MailCompleteListener getSendListener(EventType type) {
-        return mailCompleteListener.get(type);
+        return type != null? mailCompleteListener.get(type): null;
     }
 
     /**
      * @param type Type of event
      */
     @Override
-    public void removeSendListener(EventType type) {
+    public void removeSendListener(@NotNull EventType type) {
         mailCompleteListener.remove(type);
     }
 }

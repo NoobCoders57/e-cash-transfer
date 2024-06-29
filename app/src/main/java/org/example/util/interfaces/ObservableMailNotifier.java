@@ -1,5 +1,8 @@
 package org.example.util.interfaces;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 /**
  * Interface for classes that need to be notified when an email is sent
  */
@@ -24,18 +27,18 @@ public interface ObservableMailNotifier {
      * @param type Type of event
      * @param listener Listener to be notified
      */
-    void setSendListener(EventType type, MailCompleteListener listener);
+    void setSendListener(EventType type, @NotNull MailCompleteListener listener);
 
     /**
      * Get the listener for the event
      * @param type Type of event
      * @return Listener to be notified
      */
-    MailCompleteListener getSendListener(EventType type);
+    @Nullable MailCompleteListener getSendListener(EventType type);
 
     /**
      * Remove the listener for the event
      * @param type Type of event
      */
-    void removeSendListener(EventType type);
+    void removeSendListener(@NotNull EventType type);
 }

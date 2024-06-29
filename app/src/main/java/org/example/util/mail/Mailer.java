@@ -2,6 +2,7 @@ package org.example.util.mail;
 
 
 import org.example.util.config.Config;
+import org.example.util.interfaces.MailSender;
 import org.example.util.interfaces.TransportProvider;
 import org.example.util.interfaces.SessionProvider;
 
@@ -11,7 +12,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.Date;
 import java.util.Properties;
 
-public class Mailer {
+public class Mailer implements MailSender {
     private final TransportProvider transportProvider;
     private final SessionProvider sessionProvider;
 
@@ -24,6 +25,7 @@ public class Mailer {
         this(Transport::send, Session::getDefaultInstance);
     }
 
+    @Override
     public void send(String subject, String strMessage, String recipient) throws MessagingException {
         Properties properties = getProperties();
         Session session = sessionProvider.getSession(properties, new Authenticator() {
