@@ -1,4 +1,4 @@
-package org.example.util;
+package org.example.util.config;
 
 import org.junit.jupiter.api.Test;
 

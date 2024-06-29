@@ -2,7 +2,7 @@ package org.example.connection;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.example.util.Config;
+import org.example.util.config.Config;
 
 import java.sql.Connection;
 import java.sql.SQLException;

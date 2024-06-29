@@ -1,5 +1,9 @@
-package org.example.util;
+package org.example.util.mail;
 
+
+import org.example.util.config.Config;
+import org.example.util.interfaces.TransportProvider;
+import org.example.util.interfaces.SessionProvider;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
@@ -8,9 +12,21 @@ import java.util.Date;
 import java.util.Properties;
 
 public class Mailer {
-    public static void send(String subject, String strMessage, String recipient) throws MessagingException {
+    private final TransportProvider transportProvider;
+    private final SessionProvider sessionProvider;
+
+    public Mailer(TransportProvider transportProvider, SessionProvider sessionProvider) {
+        this.transportProvider = transportProvider;
+        this.sessionProvider = sessionProvider;
+    }
+
+    public Mailer() {
+        this(Transport::send, Session::getDefaultInstance);
+    }
+
+    public void send(String subject, String strMessage, String recipient) throws MessagingException {
         Properties properties = getProperties();
-        Session session = Session.getDefaultInstance(properties, new Authenticator() {
+        Session session = sessionProvider.getSession(properties, new Authenticator() {
             @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(Config.get("mail.username"), Config.get("mail.password"));
@@ -25,7 +41,7 @@ public class Mailer {
         message.setSentDate(new Date());
         message.setContent(strMessage, "text/html");
         message.saveChanges();
-        Transport.send(message);
+        transportProvider.send(message);
     }
 
     private static Properties getProperties() {

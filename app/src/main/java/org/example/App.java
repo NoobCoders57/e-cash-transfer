@@ -3,7 +3,7 @@
  */
 package org.example;
 
-import org.example.util.Config;
+import org.example.util.config.Config;
 
 public class App {
     public String getGreeting() {
