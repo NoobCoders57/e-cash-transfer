@@ -10,6 +10,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Taux</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
@@ -130,7 +131,6 @@
     </div>
 </div>
 
-
 <!-- Modal for Add/Edit Taux -->
 <div class="modal fade" id="tauxModal">
     <div class="modal-dialog">
@@ -247,3 +247,4 @@
 </script>
 </body>
 </html>
+

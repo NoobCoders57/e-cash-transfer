@@ -1,19 +1,19 @@
 package org.example.dao;
 
+import org.example.connection.ConnectionProvider;
 import org.example.models.Envoyer;
-import org.example.util.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EnvoyerDao {
+public class EnvoyerDao extends AbstractDao {
+    public EnvoyerDao(ConnectionProvider connectionProvider) {
+        super(connectionProvider);
+    }
 
-    private Connection connect() throws SQLException {
-        String url = Config.get("db.url");
-        String user = Config.get("db.user");
-        String password = Config.get("db.password");
-        return DriverManager.getConnection(url, user, password);
+    public EnvoyerDao() {
+        super();
     }
 
     public List<Envoyer> listAllEnvois() throws SQLException {

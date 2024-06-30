@@ -1,25 +1,27 @@
 package org.example.dao;
 
+import org.example.connection.ConnectionProvider;
 import org.example.models.Client;
-import org.example.util.Config;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientDao {
-    private Connection connect() throws SQLException {
-        String url = Config.get("db.url");
-        String user = Config.get("db.user");
-        String password = Config.get("db.password");
-        return DriverManager.getConnection(url, user, password);
+public class ClientDao extends AbstractDao {
+    public ClientDao(ConnectionProvider connectionProvider) {
+        super(connectionProvider);
+    }
+
+    public ClientDao() {
+        super();
     }
 
     public List<Client> listAllClients() throws SQLException {
         List<Client> listClients = new ArrayList<>();
         try (Connection conn = connect();
              Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery("SELECT * FROM CLIENT")) {
+             ResultSet rs = stmt.executeQuery("SELECT * FROM CLIENT")
+        ) {
             while (rs.next()) {
                 String numtel = rs.getString("numtel");
                 String nom = rs.getString("nom");
@@ -63,15 +65,16 @@ public class ClientDao {
         return client;
     }
 
-    public void updateClient(Client client) throws SQLException {
+    public void updateClient(String originalNumtel, Client client) throws SQLException {
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET nom = ?, sexe = ?, pays = ?, solde = ?, mail = ? WHERE numtel = ?")) {
-            pstmt.setString(1, client.nom());
-            pstmt.setString(2, client.sexe());
-            pstmt.setString(3, client.pays());
-            pstmt.setInt(4, client.solde());
-            pstmt.setString(5, client.mail());
-            pstmt.setString(6, client.numtel());
+             PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET numtel = ?, nom = ?, sexe = ?, pays = ?, solde = ?, mail = ? WHERE numtel = ?")) {
+            pstmt.setString(1, client.numtel());
+            pstmt.setString(2, client.nom());
+            pstmt.setString(3, client.sexe());
+            pstmt.setString(4, client.pays());
+            pstmt.setInt(5, client.solde());
+            pstmt.setString(6, client.mail());
+            pstmt.setString(7, originalNumtel);
             pstmt.executeUpdate();
         }
     }

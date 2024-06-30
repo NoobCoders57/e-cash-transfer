@@ -1,5 +1,13 @@
+<%--
+  Created by IntelliJ IDEA.
+  User: mario
+  Date: 25/06/2024
+  Time: 08:18
+  To change this template use File | Settings | File Templates.
+--%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -235,7 +243,6 @@
         </div>
     </div>
 </div>
-
 
 <script>
     $(document).ready(function() {

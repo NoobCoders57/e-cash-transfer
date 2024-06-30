@@ -133,7 +133,6 @@
     </div>
     <!-- /#page-content-wrapper -->
 </div>
-<!-- /#wrapper -->
 
 <!-- Modal for Add/Edit Client -->
 <div class="modal fade" id="clientModal">
@@ -142,7 +141,7 @@
 
             <!-- Modal Header -->
             <div class="modal-header">
-                <h4 class="modal-title">Client</h4>
+                <h4 class="modal-title">Client Form</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
 
