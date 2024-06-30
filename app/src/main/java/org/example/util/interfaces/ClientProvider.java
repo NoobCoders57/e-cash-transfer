@@ -1,9 +1,18 @@
 package org.example.util.interfaces;
 
 import org.example.models.Client;
+import org.example.util.exceptions.ModelProviderException;
 
-import java.sql.SQLException;
-
+/**
+ * Interface that provides the method to get a client
+ */
 public interface ClientProvider {
-    Client getClient(String numtel) throws SQLException;
+    /**
+     * Get a client by its phone number
+     * @param numtel the client's phone number
+     * @return the client
+     * @throws ModelProviderException if an error occurs while fetching the client
+     * @see Client
+     */
+    Client getClient(String numtel) throws ModelProviderException;
 }

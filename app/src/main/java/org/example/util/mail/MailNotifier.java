@@ -3,16 +3,17 @@ package org.example.util.mail;
 import org.example.dao.ClientDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
+import org.example.util.exceptions.ModelProviderException;
 import org.example.util.interfaces.ClientProvider;
 import org.example.util.interfaces.MailCompleteListener;
 import org.example.util.interfaces.MailSender;
 import org.example.util.interfaces.ObservableMailNotifier;
+import org.example.util.providers.DefaultClientProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -56,12 +57,12 @@ public class MailNotifier implements ObservableMailNotifier {
      * @param transaction    Transaction to be notified
      * @param clientProvider Provider of clients
      * @param mailer         Mailer to send emails
-     * @throws SQLException If a database access error occurs
+     * @throws ModelProviderException If an error occurs while fetching the client
      */
-    public MailNotifier(@NotNull Envoyer transaction, @Nullable ClientProvider clientProvider, @Nullable MailSender mailer) throws SQLException {
+    public MailNotifier(@NotNull Envoyer transaction, @Nullable ClientProvider clientProvider, @Nullable MailSender mailer) throws ModelProviderException {
         this.transaction = transaction;
         this.mailer = mailer != null ? mailer : new Mailer();
-        ClientProvider provider = clientProvider != null ? clientProvider : numtel -> new ClientDao().getClient(numtel);
+        ClientProvider provider = clientProvider != null ? clientProvider : new DefaultClientProvider(new ClientDao());
         this.clients.put(Party.CASH_RECEIVER, provider.getClient(transaction.numRecepteur()));
         this.clients.put(Party.CASH_SENDER, provider.getClient(transaction.numEnvoyeur()));
     }
@@ -70,9 +71,8 @@ public class MailNotifier implements ObservableMailNotifier {
      * Create a new MailNotifier with the given transaction a default client provider and a default mailer
      *
      * @param transaction Transaction to be notified
-     * @throws SQLException If a database access error occurs
      */
-    public MailNotifier(@NotNull Envoyer transaction) throws SQLException {
+    public MailNotifier(@NotNull Envoyer transaction) throws ModelProviderException {
         this(transaction, null, null);
     }
 
@@ -131,7 +131,7 @@ public class MailNotifier implements ObservableMailNotifier {
      */
     @Override
     public MailCompleteListener getSendListener(EventType type) {
-        return type != null? mailCompleteListener.get(type): null;
+        return type != null ? mailCompleteListener.get(type) : null;
     }
 
     /**
