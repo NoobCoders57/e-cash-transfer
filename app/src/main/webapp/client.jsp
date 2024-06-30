@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: mario
-  Date: 25/06/2024
-  Time: 08:17
-  To change this template use File | Settings | File Templates.
---%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 
@@ -13,62 +6,134 @@
 <head>
     <title>Clients</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.3/js/dataTables.bootstrap4.min.js"></script>
+
+
+    <style>
+        #sidebar-wrapper {
+            width: 220px;
+            justify-content: center;
+            height: 100vh;
+            background-color: #40A578;
+        }
+        .list-group-item-action:hover {
+            background-color: rgb(167, 237, 206, 0.3);
+            border-radius: 10px;
+            color: ghostwhite;
+        }
+        .list-group-item i {
+            margin-right: 5px;
+        }
+        .list-group-item {
+            background-color: #40A578;
+            color: whitesmoke;
+            font-size: 16px;
+            border: none;
+            font-weight: bold;
+            text-align: left;
+        }
+        .sidebar-content {
+            padding: 0 1rem;
+        }
+        hr {
+            border: 2px solid rgb(167, 237, 206, 0.3);
+            border-radius: 25px;
+        }
+        #clientsTable th {
+            width: 170px;
+            text-align: center;
+        }
+        #clientsTable td {
+            text-align: left;
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <h2>Clients</h2>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#clientModal">
-        Add New Client
-    </button>
-    <table class="table table-striped mt-3">
-        <thead>
-        <tr>
-            <th>Téléphone</th>
-            <th>Nom</th>
-            <th>Sexe</th>
-            <th>Pays</th>
-            <th>Solde</th>
-            <th>Mail</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <c:forEach var="client" items="${listClients}">
-            <tr>
-                <td><c:out value="${client.numtel()}"/></td>
-                <td><c:out value="${client.nom()}"/></td>
-                <td><c:out value="${client.sexe()}"/></td>
-                <td><c:out value="${client.pays()}"/></td>
-                <td><c:out value="${client.solde()}"/></td>
-                <td><c:out value="${client.mail()}"/></td>
-                <td>
-                    <button class="btn btn-warning btn-sm edit-btn"
-                            data-numtel="<c:out value='${client.numtel()}'/>"
-                            data-nom="<c:out value='${client.nom()}'/>"
-                            data-sexe="<c:out value='${client.sexe()}'/>"
-                            data-pays="<c:out value='${client.pays()}'/>"
-                            data-solde="<c:out value='${client.solde()}'/>"
-                            data-mail="<c:out value='${client.mail()}'/>"
-                            data-toggle="modal"
-                            data-target="#clientModal">
-                        Edit
-                    </button>
-                    <button class="btn btn-danger btn-sm delete-btn"
-                            data-numtel="<c:out value='${client.numtel()}'/>"
-                            data-nom="<c:out value='${client.nom()}'/>"
-                            data-toggle="modal"
-                            data-target="#deleteConfirmationModal">
-                        Delete
-                    </button>
-                </td>
-            </tr>
-        </c:forEach>
-        </tbody>
-    </table>
+<div class="d-flex" id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper">
+        <div class="list-group list-group-flush sidebar-content">
+            <div class="nav1 mt-5">
+                <a href="client" class="list-group-item list-group-item-action"><i class="bi bi-person-circle"></i>&nbsp; Clients</a>
+                <hr class="mt-2 mb-2 w-75">
+            </div>
+            <div>
+                <a href="frais" class="list-group-item list-group-item-action"><i class="bi bi-coin"></i> &nbsp;Frais</a>
+                <hr class="mt-2 mb-2 w-75">
+            </div>
+            <div>
+                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Envoyer</a>
+                <hr class="mt-2 mb-2 w-75">
+            </div>
+            <div>
+                <a href="taux" class="list-group-item list-group-item-action"><i class="bi bi-currency-exchange mr-2"></i> Taux</a>
+            </div>
+        </div>
+    </div>
+    <!-- /#sidebar-wrapper -->
+
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+        <div class="container ml-5">
+            <button type="button" class="btn btn-primary mb-4 mt-5" data-toggle="modal" data-target="#clientModal">
+                Ajouter <i class="bi bi-person-fill"></i>
+            </button>
+            <table id="clientsTable" class="table table-striped mx-auto w-100">
+                <thead>
+                <tr>
+                    <th >Téléphone</th>
+                    <th>Nom</th>
+                    <th>Sexe</th>
+                    <th>Pays</th>
+                    <th>Solde</th>
+                    <th>Mail</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <c:forEach var="client" items="${listClients}">
+                    <tr>
+                        <td><c:out value="${client.numtel()}"/></td>
+                        <td><c:out value="${client.nom()}"/></td>
+                        <td><c:out value="${client.sexe()}"/></td>
+                        <td><c:out value="${client.pays()}"/></td>
+                        <td><c:out value="${client.solde()}"/></td>
+                        <td><c:out value="${client.mail()}"/></td>
+                        <td class="pl-4">
+                            <button class="btn btn-warning btn-sm edit-btn rounded-circle"
+                                    data-numtel="<c:out value='${client.numtel()}'/>"
+                                    data-nom="<c:out value='${client.nom()}'/>"
+                                    data-sexe="<c:out value='${client.sexe()}'/>"
+                                    data-pays="<c:out value='${client.pays()}'/>"
+                                    data-solde="<c:out value='${client.solde()}'/>"
+                                    data-mail="<c:out value='${client.mail()}'/>"
+                                    data-toggle="modal"
+                                    data-target="#clientModal">
+                                <i class="bi bi-pen-fill"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm delete-btn rounded-circle"
+                                    data-numtel="<c:out value='${client.numtel()}'/>"
+                                    data-nom="<c:out value='${client.nom()}'/>"
+                                    data-toggle="modal"
+                                    data-target="#deleteConfirmationModal">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- /#page-content-wrapper -->
 </div>
+<!-- /#wrapper -->
 
 <!-- Modal for Add/Edit Client -->
 <div class="modal fade" id="clientModal">
@@ -77,7 +142,7 @@
 
             <!-- Modal Header -->
             <div class="modal-header">
-                <h4 class="modal-title">Client Form</h4>
+                <h4 class="modal-title">Client</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
 
@@ -86,41 +151,68 @@
                 <form id="clientForm" action="client" method="post">
                     <input type="hidden" id="formAction" name="action" value="insert">
                     <input type="hidden" id="originalNumtel" name="originalNumtel">
-                    <div class="form-group">
-                        <label for="numtel">Téléphone:</label>
+
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend" style="min-width: 90px;">
+                            <span class="input-group-text" style="width: 100%;">Téléphone</span>
+                        </div>
                         <input type="text" class="form-control" id="numtel" name="numtel" required>
                     </div>
-                    <div class="form-group">
-                        <label for="nom">Nom:</label>
+
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend" style="min-width: 90px;">
+                            <span class="input-group-text" style="width: 100%;">Nom</span>
+                        </div>
                         <input type="text" class="form-control" id="nom" name="nom" required>
                     </div>
-                    <div class="form-group">
-                        <label for="sexe">Sexe:</label>
-                        <input type="text" class="form-control" id="sexe" name="sexe" required>
+
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend" style="min-width: 90px;">
+                            <span class="input-group-text" style="width: 100%;">Sexe</span>
+                        </div>
+                        <div class="form-check form-check-inline ml-2">
+                            <input class="form-check-input" type="radio" name="sexe" id="feminin" value="F" required>
+                            <label class="form-check-label" for="feminin">F</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="sexe" id="masculin" value="M">
+                            <label class="form-check-label" for="masculin">M</label>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label for="pays">Pays:</label>
+
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend" style="min-width: 90px;">
+                            <span class="input-group-text" style="width: 100%;">Pays</span>
+                        </div>
                         <input type="text" class="form-control" id="pays" name="pays" required>
                     </div>
-                    <div class="form-group">
-                        <label for="solde">Solde:</label>
+
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend" style="min-width: 90px;">
+                            <span class="input-group-text" style="width: 100%;">Solde</span>
+                        </div>
                         <input type="number" class="form-control" id="solde" name="solde" required>
                     </div>
-                    <div class="form-group">
-                        <label for="mail">Mail:</label>
+
+                    <div class="input-group mb-4">
+                        <div class="input-group-prepend" style="min-width: 90px;">
+                            <span class="input-group-text" style="width: 100%;">Mail</span>
+                        </div>
                         <input type="email" class="form-control" id="mail" name="mail" required>
                     </div>
+
                 </form>
             </div>
 
             <!-- Modal Footer -->
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="saveClientBtn">Save</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveClientBtn">Enregistrer</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
             </div>
 
         </div>
     </div>
+</div>
 </div>
 
 <!-- Modal for Delete Confirmation -->
@@ -156,6 +248,25 @@
 <!-- JavaScript pour la confirmation de suppression -->
 <script>
     $(document).ready(function() {
+        // Initialisation de DataTables
+        $('#clientsTable').DataTable({
+            "pagingType": "simple_numbers",
+            "language": {
+                "lengthMenu": "Afficher _MENU_ enregistrements par page",
+                "zeroRecords": "Aucun enregistrement trouvé",
+                "info": "Affichage de _PAGE_ sur _PAGES_",
+                "infoEmpty": "Aucun enregistrement disponible",
+                "infoFiltered": "",
+                "search": "Recherche:",
+                "paginate": {
+                    "first": "Premier",
+                    "last": "Dernier",
+                    "next": "Suivant",
+                    "previous": "Précédent"
+                }
+            }
+        });
+
         // Ouvrir le formulaire modal pour l'édition
         $('.edit-btn').on('click', function() {
             const button = $(this);
@@ -163,7 +274,13 @@
             $('#originalNumtel').val(button.data('numtel'));
             $('#numtel').val(button.data('numtel'));
             $('#nom').val(button.data('nom'));
-            $('#sexe').val(button.data('sexe'));
+            // Sélectionner le sexe correspondant
+            const sexe = button.data('sexe');
+            if (sexe === 'F') {
+                $('#feminin').prop('checked', true);
+            } else {
+                $('#masculin').prop('checked', true);
+            }
             $('#pays').val(button.data('pays'));
             $('#solde').val(button.data('solde'));
             $('#mail').val(button.data('mail'));
@@ -190,7 +307,6 @@
             $('#deleteNumtel').val(numtel);
         });
     });
-
 </script>
 </body>
 </html>
