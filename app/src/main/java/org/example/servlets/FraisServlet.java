@@ -1,5 +1,6 @@
 package org.example.servlets;
 
+import com.google.gson.Gson;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -7,9 +8,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.dao.FraisDao;
 import org.example.models.Frais;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
 
 @WebServlet("/frais")
@@ -18,30 +21,43 @@ public class FraisServlet extends HttpServlet {
     private FraisDao fraisDAO;
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         fraisDAO = new FraisDao();
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
-        if (action == null) {
-            action = "list";
-        }
-
-        try {
-            if ("list".equals(action)) {
-                listFrais(request, response);
-            } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
+        if (action == null || "list".equals(action)) {
+            try {
+                if ("list".equals(action)) {
+                    listFrais(request, response);
+                } else {
+                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
+                }
+            } catch (SQLException e) {
+                throw new ServletException(e);
             }
-        } catch (SQLException e) {
-            throw new ServletException(e);
+        } else if (action.equals("get_frais")) {
+            try {
+                getFraisForMontant(request, response);
+            } catch (SQLException e) {
+                throw new ServletException(e);
+            }
         }
     }
 
+    private void getFraisForMontant(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws SQLException, IOException {
+        HashMap<String, Integer> hashMap = new HashMap<>();
+        int montant = Integer.parseInt(request.getParameter("montant"));
+
+        response.setContentType("application/json");
+        hashMap.put("frais", fraisDAO.getFraisValueForMontant(montant));
+        response.getWriter().println(new Gson().toJson(hashMap));
+    }
+
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(@NotNull HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         try {
             switch (action) {
@@ -77,13 +93,6 @@ public class FraisServlet extends HttpServlet {
         Frais newFrais = new Frais(montant1, montant2, frais);
         fraisDAO.insertFrais(newFrais);
         response.sendRedirect("frais");
-    }
-
-    private void editFrais(HttpServletRequest request, HttpServletResponse response) throws SQLException, ServletException, IOException {
-        int idfrais = Integer.parseInt(request.getParameter("idfrais"));
-        Frais existingFrais = fraisDAO.getFrais(idfrais);
-        request.setAttribute("frais", existingFrais);
-        request.getRequestDispatcher("/frais.jsp").forward(request, response);
     }
 
     private void updateFrais(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {

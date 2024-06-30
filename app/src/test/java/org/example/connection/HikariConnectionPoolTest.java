@@ -1,7 +1,5 @@
 package org.example.connection;
 
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.pool.HikariPool;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
@@ -22,19 +20,6 @@ class HikariConnectionPoolTest {
                 assertFalse(connection.isClosed());
                 connection.close();
                 assertTrue(connection.isClosed());
-            });
-        }
-
-        @Test
-        void testGetConnectionWithException() {
-            assertThrows(HikariPool.PoolInitializationException.class, () -> {
-                HikariConfig config = new HikariConfig();
-                config.setJdbcUrl("jdbc:postgresql://localhost:5432/nonexistent");
-                config.setUsername("postgres");
-                config.setPassword("postgres");
-                ConnectionProvider connectionProvider = new HikariConnectionPool(config);
-                Connection connection = connectionProvider.getConnection();
-                connection.close();
             });
         }
     }

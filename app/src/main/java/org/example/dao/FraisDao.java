@@ -61,6 +61,30 @@ public class FraisDao extends AbstractDao {
         return frais;
     }
 
+    @Nullable
+    public Frais getFraisForMontant(int montant) throws SQLException {
+        Frais frais = null;
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement("SELECT * FROM FRAIS WHERE montant1 <= ? AND montant2 >= ?")) {
+            pstmt.setInt(1, montant);
+            pstmt.setInt(2, montant);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                int idfrais = rs.getInt("idfrais");
+                int montant1 = rs.getInt("montant1");
+                int montant2 = rs.getInt("montant2");
+                int fraisValue = rs.getInt("frais");
+                frais = new Frais(idfrais, montant1, montant2, fraisValue);
+            }
+        }
+        return frais;
+    }
+
+    public int getFraisValueForMontant(int montant) throws SQLException {
+        Frais frais = getFraisForMontant(montant);
+        return frais != null ? frais.frais() : 0;
+    }
+
     public void updateFrais(@NotNull Frais frais) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("UPDATE FRAIS SET montant1 = ?, montant2 = ?, frais = ? WHERE idfrais = ?")) {
