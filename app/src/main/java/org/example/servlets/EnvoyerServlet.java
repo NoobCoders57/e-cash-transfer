@@ -7,8 +7,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.dao.ClientDao;
 import org.example.dao.EnvoyerDao;
+import org.example.dao.FraisDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -36,13 +38,10 @@ public class EnvoyerServlet extends HttpServlet {
         }
 
         try {
-            switch (action) {
-                case "list":
-                    listEnvoyer(request, response);
-                    break;
-                default:
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
-                    break;
+            if (action.equals("list")) {
+                listEnvoyer(request, response);
+            } else {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -58,18 +57,10 @@ public class EnvoyerServlet extends HttpServlet {
 
         try {
             switch (action) {
-                case "insert":
-                    insertEnvoyer(request, response);
-                    break;
-                case "update":
-                    updateEnvoyer(request, response);
-                    break;
-                case "delete":
-                    deleteEnvoyer(request, response);
-                    break;
-                default:
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
-                    break;
+                case "insert" -> insertEnvoyer(request, response);
+                case "update" -> updateEnvoyer(request, response);
+                case "delete" -> deleteEnvoyer(request, response);
+                default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -81,70 +72,71 @@ public class EnvoyerServlet extends HttpServlet {
         List<Client> listClients = clientDao.listAllClients(); // Fetching list of clients
         request.setAttribute("listEnvoyer", listEnvoyer);
         request.setAttribute("listClients", listClients); // Adding list of clients to request attributes
+        request.setAttribute("recette", getRecette());
         request.getRequestDispatcher("/envoyer.jsp").forward(request, response);
     }
 
     private void insertEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        String numEnvoyeur = request.getParameter("numEnvoyeur");
-        String numRecepteur = request.getParameter("numRecepteur");
-        int montant = Integer.parseInt(request.getParameter("montant"));
-        Date date = new Date();
-        String raison = request.getParameter("raison");
+        int idEnv = 0; // Fake idEnv
+        Envoyer newEnvoyer = getEnvoyerFromRequestParams(request, idEnv);
 
         // Fetching client objects
-        Client envoyeur = clientDao.getClient(numEnvoyeur);
-        Client recepteur = clientDao.getClient(numRecepteur);
+        Client envoyeur = clientDao.getClient(newEnvoyer.numEnvoyeur());
+        Client recepteur = clientDao.getClient(newEnvoyer.numRecepteur());
 
         if (envoyeur == null || recepteur == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid clients");
             return;
         }
 
-        // Creating new Envoyer object
-        Envoyer newEnvoyer = new Envoyer(numEnvoyeur, numRecepteur, montant, date, raison);
         envoyerDAO.insertEnvoyer(newEnvoyer);
-
+        
         // Updating solde of envoyeur and recepteur
-        int newEnvoyeurSolde = envoyeur.solde() - montant;
-        int newRecepteurSolde = recepteur.solde() + montant;
-        clientDao.updateSolde(numEnvoyeur, newEnvoyeurSolde);
-        clientDao.updateSolde(numRecepteur, newRecepteurSolde);
+        int fraisValueForMontant = new FraisDao().getFraisValueForMontant(newEnvoyer.montant());
+        int newEnvoyeurSolde = envoyeur.solde() - newEnvoyer.montant() - fraisValueForMontant;
+        int newRecepteurSolde = recepteur.solde() + newEnvoyer.montant();
+        clientDao.updateSolde(newEnvoyer.numEnvoyeur(), newEnvoyeurSolde);
+        clientDao.updateSolde(newEnvoyer.numRecepteur(), newRecepteurSolde);
 
         response.sendRedirect("envoyer");
     }
 
-    private void updateEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+    private void updateEnvoyer(@NotNull HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int idEnv = Integer.parseInt(request.getParameter("idenv"));
-        String numEnvoyeur = request.getParameter("numEnvoyeur");
-        String numRecepteur = request.getParameter("numRecepteur");
-        int montant = Integer.parseInt(request.getParameter("montant"));
-        String raison = request.getParameter("raison");
+        Envoyer envoyer = getEnvoyerFromRequestParams(request, idEnv);
 
         // Fetching client objects
-        Client envoyeur = clientDao.getClient(numEnvoyeur);
-        Client recepteur = clientDao.getClient(numRecepteur);
+        Client envoyeur = clientDao.getClient(request.getParameter("numEnvoyeur"));
+        Client recepteur = clientDao.getClient(request.getParameter("numRecepteur"));
 
         if (envoyeur == null || recepteur == null) {
             response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid clients");
             return;
         }
 
+
         // Checking envoyeur's solde
         Envoyer oldEnvoyer = envoyerDAO.getEnvoyer(idEnv);
         int oldMontant = oldEnvoyer.montant();
-        int diffMontant = montant - oldMontant;
-
-        // Updating Envoyer object
-        Envoyer envoyer = new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, new Date(), raison);
+        int diffMontant = envoyer.montant() - oldMontant;
         envoyerDAO.updateEnvoyer(envoyer);
 
         // Adjusting solde of envoyeur and recepteur
         int newEnvoyeurSolde = envoyeur.solde() - diffMontant;
         int newRecepteurSolde = recepteur.solde() + diffMontant;
-        clientDao.updateSolde(numEnvoyeur, newEnvoyeurSolde);
-        clientDao.updateSolde(numRecepteur, newRecepteurSolde);
+        clientDao.updateSolde(envoyer.numEnvoyeur(), newEnvoyeurSolde);
+        clientDao.updateSolde(envoyer.numRecepteur(), newRecepteurSolde);
 
         response.sendRedirect("envoyer");
+    }
+
+    private static @NotNull Envoyer getEnvoyerFromRequestParams(HttpServletRequest request, int idEnv) {
+        Date date = new Date();
+        String numEnvoyeur = request.getParameter("numEnvoyeur");
+        String numRecepteur = request.getParameter("numRecepteur");
+        int montant = Integer.parseInt(request.getParameter("montant"));
+        String raison = request.getParameter("raison");
+        return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison);
     }
 
     private void deleteEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
@@ -174,5 +166,15 @@ public class EnvoyerServlet extends HttpServlet {
         // Deleting Envoyer
         envoyerDAO.deleteEnvoyer(idEnv);
         response.sendRedirect("envoyer");
+    }
+
+    private int getRecette() throws SQLException {
+        List<Envoyer> listEnvoyer = envoyerDAO.listAllEnvois();
+        FraisDao fraisDao = new FraisDao();
+        int recette = 0;
+        for (Envoyer envoyer : listEnvoyer) {
+            recette += fraisDao.getFraisValueForMontant(envoyer.montant());
+        }
+        return recette;
     }
 }

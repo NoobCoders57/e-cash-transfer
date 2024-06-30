@@ -2,6 +2,7 @@ package org.example.dao;
 
 import org.example.connection.ConnectionProvider;
 import org.example.models.Envoyer;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -35,7 +36,7 @@ public class EnvoyerDao extends AbstractDao {
         return listEnvoyer;
     }
 
-    public void insertEnvoyer(Envoyer envoyer) throws SQLException {
+    public void insertEnvoyer(@NotNull Envoyer envoyer) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("INSERT INTO ENVOYER (numEnvoyeur, numRecepteur, montant, date, raison) VALUES (?, ?, ?, ?, ?)")) {
             pstmt.setString(1, envoyer.numEnvoyeur());
@@ -65,7 +66,7 @@ public class EnvoyerDao extends AbstractDao {
         return envoyer;
     }
 
-    public void updateEnvoyer(Envoyer envoyer) throws SQLException {
+    public void updateEnvoyer(@NotNull Envoyer envoyer) throws SQLException {
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement("UPDATE ENVOYER SET numEnvoyeur = ?, numRecepteur = ?, montant = ?, raison = ? WHERE idEnv = ?")) {
             pstmt.setString(1, envoyer.numEnvoyeur());
             pstmt.setString(2, envoyer.numRecepteur());

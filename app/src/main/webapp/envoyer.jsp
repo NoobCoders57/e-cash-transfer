@@ -28,14 +28,17 @@
             height: 100vh; /* Hauteur primaire */
             background-color: #40A578; /* Couleur de fond primaire */
         }
+
         .list-group-item-action:hover {
             background-color: rgb(167, 237, 206, 0.3); /* Changer le background en info au hover */
             border-radius: 10px;
-            color : ghostwhite;
+            color: ghostwhite;
         }
+
         .list-group-item i {
             margin-right: 5px;
         }
+
         .list-group-item {
             background-color: #40A578;
             color: whitesmoke;
@@ -44,18 +47,22 @@
             font-weight: bold;
             text-align: left;
         }
+
         .sidebar-content {
             padding: 0 1rem;
         }
-        hr{
+
+        hr {
             border: 2px solid rgb(167, 237, 206, 0.3);
             border-radius: 25px;
         }
-        #EnvoyerTable th{
+
+        #EnvoyerTable th {
             width: 170px;
             text-align: center;
         }
-        #EnvoyerTable td{
+
+        #EnvoyerTable td {
             text-align: left;
         }
 
@@ -67,11 +74,13 @@
     <div id="sidebar-wrapper">
         <div class="list-group list-group-flush sidebar-content">
             <div class="nav1 mt-5">
-                <a href="client" class="list-group-item list-group-item-action"><i class="bi bi-person-circle"></i>&nbsp; Clients</a>
+                <a href="client" class="list-group-item list-group-item-action"><i class="bi bi-person-circle"></i>&nbsp;
+                    Clients</a>
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
-                <a href="frais" class="list-group-item list-group-item-action"><i class="bi bi-coin"></i> &nbsp;Frais</a>
+                <a href="frais" class="list-group-item list-group-item-action"><i class="bi bi-coin"></i>
+                    &nbsp;Frais</a>
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
@@ -79,7 +88,8 @@
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
-                <a href="taux" class="list-group-item list-group-item-action"><i class="bi bi-currency-exchange mr-2"></i> Taux</a>
+                <a href="taux" class="list-group-item list-group-item-action"><i
+                        class="bi bi-currency-exchange mr-2"></i> Taux</a>
             </div>
         </div>
     </div>
@@ -134,7 +144,17 @@
                 </tbody>
             </table>
         </div>
+
+        <div class="text-center align-content-center align-items-center">
+
+            <h4>
+                <i class="bi bi-bank2 m-3"></i>
+                RECETTE : <c:out value="${recette}"/> MGA
+            </h4>
+        </div>
     </div>
+
+
 </div>
 
 
@@ -159,7 +179,9 @@
                         <label for="numEnvoyeur">Envoyeur:</label>
                         <select class="form-control" id="numEnvoyeur" name="numEnvoyeur" required>
                             <c:forEach var="client" items="${listClients}">
-                                <option data-solde="<c:out value='${client.solde()}'/>" value="<c:out value='${client.numtel()}'/>"><c:out value='${client.nom()}'/></option>
+                                <option data-solde="<c:out value='${client.solde()}'/>"
+                                        value="<c:out value='${client.numtel()}'/>"><c:out
+                                        value='${client.nom()}'/></option>
                             </c:forEach>
                         </select>
                     </div>
@@ -167,7 +189,8 @@
                         <label for="numRecepteur">Récepteur:</label>
                         <select class="form-control" id="numRecepteur" name="numRecepteur" required>
                             <c:forEach var="client" items="${listClients}">
-                                <option value="<c:out value='${client.numtel()}'/>"><c:out value='${client.nom()}'/></option>
+                                <option value="<c:out value='${client.numtel()}'/>"><c:out
+                                        value='${client.nom()}'/></option>
                             </c:forEach>
                         </select>
                     </div>
@@ -245,7 +268,7 @@
 </div>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
 
         $('#EnvoyerTable').DataTable({
             "pagingType": "simple_numbers",
@@ -266,12 +289,12 @@
         });
 
         // Filtrer les options du récepteur en fonction de l'envoyeur sélectionné
-        $('#numEnvoyeur').on('change', function() {
+        $('#numEnvoyeur').on('change', function () {
             var selectedEnvoyeur = $(this).val();
             var selectedSolde = $(this).find('option:selected').data('solde');
             $('#soldeEnvoyeur').val(selectedSolde);
 
-            $('#numRecepteur option').each(function() {
+            $('#numRecepteur option').each(function () {
                 if ($(this).val() === selectedEnvoyeur) {
                     $(this).prop('disabled', true);
                 } else {
@@ -281,7 +304,7 @@
         });
 
         // Ouvrir le formulaire modal pour l'édition
-        $('.edit-btn').on('click', function() {
+        $('.edit-btn').on('click', function () {
             const button = $(this);
             $('#formAction').val('update');
             $('#idenv').val(button.data('idenv'));
@@ -296,20 +319,22 @@
             $('#soldeEnvoyeur').val(selectedSolde);
         });
 
-        function checkSoldeAndSubmit() {
+        async function checkSoldeAndSubmit() {
             var montant = parseInt($('#montant').val());
             var soldeEnvoyeur = parseInt($('#soldeEnvoyeur').val());
 
             console.log($('#soldeEnvoyeur').val());
-
-            // Vérifier si le montant est supérieur au solde de l'envoyeur
-            if (montant > soldeEnvoyeur) {
-                // Afficher le modal d'insuffisance de solde
-                $('#insufficientFundsModal').modal('show');
-            } else {
-                // Soumettre le formulaire si le solde est suffisant
-                $('#envoyerForm').submit();
-            }
+            $.get('/app/frais?action=get_frais&montant=' + montant, function (data) {
+                montant += parseInt(data['frais']);
+                // Vérifier si le montant est supérieur au solde de l'envoyeur
+                if (montant > soldeEnvoyeur) {
+                    // Afficher le modal d'insuffisance de solde
+                    $('#insufficientFundsModal').modal('show');
+                } else {
+                    // Soumettre le formulaire si le solde est suffisant
+                    $('#envoyerForm').submit();
+                }
+            });
         }
 
         // Réinitialiser le formulaire modal à sa fermeture
@@ -319,13 +344,13 @@
             $('#idenv').val('');
         });
 
-        // Soumettre le formulaire envoyer
-        $('#saveEnvoyerBtn').on('click', function() {
+        // Soumettre le formulaire envoyé
+        $('#saveEnvoyerBtn').on('click', function () {
             checkSoldeAndSubmit();
         });
 
         // Afficher la boîte de dialogue de confirmation de suppression
-        $('.delete-btn').on('click', function() {
+        $('.delete-btn').on('click', function () {
             const button = $(this);
             const idenv = button.data('idenv');
             $('#deleteIdenv').val(idenv);

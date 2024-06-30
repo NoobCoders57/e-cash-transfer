@@ -10,7 +10,7 @@ import java.sql.SQLException;
 public class HikariConnectionPool implements ConnectionProvider {
     private static final HikariConfig CONFIG;
 
-    private final HikariDataSource ds;
+    private static final HikariDataSource DATA_SOURCE;
 
     static {
         CONFIG = new HikariConfig();
@@ -18,18 +18,14 @@ public class HikariConnectionPool implements ConnectionProvider {
         CONFIG.setUsername(Config.get("db.user"));
         CONFIG.setPassword(Config.get("db.password"));
         CONFIG.setMaximumPoolSize(Integer.parseInt(Config.get("db.pool.size")));
+
+        DATA_SOURCE = new HikariDataSource(CONFIG);
     }
 
-    public HikariConnectionPool() {
-        this(CONFIG);
-    }
-
-    public HikariConnectionPool(HikariConfig configuration) {
-        this.ds = new HikariDataSource(configuration);
-    }
+    public HikariConnectionPool() { }
 
     @Override
     public Connection getConnection() throws SQLException {
-        return ds.getConnection();
+        return DATA_SOURCE.getConnection();
     }
 }
