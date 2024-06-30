@@ -19,33 +19,49 @@ import org.example.util.providers.DefaultEnvoyerProvider;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.time.OffsetDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TransactionPDFGenerator implements ReleveOperationWriter {
+/**
+ * A class that generates a PDF file containing a client's sent cash transactions for a given month.
+ */
+public class TransactionPdfGenerator implements ReleveOperationWriter {
     public final String MONETARY_UNIT = "Ariary";
 
     private final EnvoyerProvider envoyerProvider;
     private final ClientProvider clientProvider;
 
-    public TransactionPDFGenerator(EnvoyerProvider envoyerProvider, ClientProvider clientProvider) {
+    /**
+     * Constructs a new TransactionPdfGenerator with the given EnvoyerProvider and ClientProvider.
+     *
+     * @param envoyerProvider the EnvoyerProvider to use
+     * @param clientProvider  the ClientProvider to use
+     */
+    public TransactionPdfGenerator(EnvoyerProvider envoyerProvider, ClientProvider clientProvider) {
         this.envoyerProvider = envoyerProvider;
         this.clientProvider = clientProvider;
     }
 
-    public TransactionPDFGenerator() {
+    /**
+     * Constructs a new TransactionPdfGenerator with the default EnvoyerProvider and ClientProvider.
+     */
+    public TransactionPdfGenerator() {
         this(new DefaultEnvoyerProvider(new EnvoyerDao()), new DefaultClientProvider(new ClientDao()));
     }
 
     @Override
     public void writeReleveOperation(@NotNull Client client, @NotNull YearMonth month, @NotNull OutputStream out) throws ModelProviderException {
-        Date dateStart = Date.from(month.atDay(1).atStartOfDay().toInstant((ZoneOffset) ZoneOffset.systemDefault()));
-        Date dateEnd = Date.from(month.atEndOfMonth().atStartOfDay().toInstant((ZoneOffset) ZoneOffset.systemDefault()));
-        List<Envoyer> transactions = envoyerProvider.allTransactions(client.numtel(), dateStart, dateEnd);
+        ZoneOffset zoneOffset = OffsetDateTime.now(ZoneId.systemDefault()).getOffset();
+        Date dateStart = Date.from(month.atDay(1).atStartOfDay().toInstant(zoneOffset));
+        Date dateEnd = Date.from(month.atEndOfMonth().atStartOfDay().toInstant(zoneOffset));
+        List<Envoyer> transactions = envoyerProvider.sentTransactions(client.numtel(), dateStart, dateEnd);
         PdfDocument pdfDocument = new PdfDocument(new PdfWriter(out));
 
         Document document = new Document(pdfDocument);
@@ -67,8 +83,9 @@ public class TransactionPDFGenerator implements ReleveOperationWriter {
         table.addHeaderCell("Nom du récepteur");
         table.addHeaderCell("Montant");
 
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy");
         for (Envoyer transaction : transactions) {
-            table.addCell(formatter.format(transaction.date().toInstant()));
+            table.addCell(simpleDateFormat.format(transaction.date()));
             table.addCell(transaction.raison());
             table.addCell(clientProvider.getClient(transaction.numRecepteur()).nom());
             table.addCell(String.valueOf(transaction.montant()));
