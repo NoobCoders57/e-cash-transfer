@@ -65,16 +65,15 @@ public class ClientDao extends AbstractDao {
         return client;
     }
 
-    public void updateClient(String originalNumtel, Client client) throws SQLException {
+    public void updateClient(Client client) throws SQLException {
         try (Connection conn = connect();
-             PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET numtel = ?, nom = ?, sexe = ?, pays = ?, solde = ?, mail = ? WHERE numtel = ?")) {
-            pstmt.setString(1, client.numtel());
-            pstmt.setString(2, client.nom());
-            pstmt.setString(3, client.sexe());
-            pstmt.setString(4, client.pays());
-            pstmt.setInt(5, client.solde());
-            pstmt.setString(6, client.mail());
-            pstmt.setString(7, originalNumtel);
+             PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET nom = ?, sexe = ?, pays = ?, solde = ?, mail = ? WHERE numtel = ?")) {
+            pstmt.setString(1, client.nom());
+            pstmt.setString(2, client.sexe());
+            pstmt.setString(3, client.pays());
+            pstmt.setInt(4, client.solde());
+            pstmt.setString(5, client.mail());
+            pstmt.setString(6, client.numtel());
             pstmt.executeUpdate();
         }
     }
