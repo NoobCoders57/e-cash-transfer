@@ -1,10 +1,14 @@
 package org.example.util.pdf;
 
+import com.itextpdf.io.font.constants.StandardFonts;
+import com.itextpdf.kernel.font.PdfFont;
+import com.itextpdf.kernel.font.PdfFontFactory;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.TextAlignment;
 import com.itextpdf.layout.properties.UnitValue;
 import org.example.dao.ClientDao;
 import org.example.dao.EnvoyerDao;
@@ -18,7 +22,9 @@ import org.example.util.providers.DefaultClientProvider;
 import org.example.util.providers.DefaultEnvoyerProvider;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.OutputStream;
+import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.time.OffsetDateTime;
 import java.time.YearMonth;
@@ -57,7 +63,8 @@ public class TransactionPdfGenerator implements ReleveOperationWriter {
     }
 
     @Override
-    public void writeReleveOperation(@NotNull Client client, @NotNull YearMonth month, @NotNull OutputStream out) throws ModelProviderException {
+    public void writeReleveOperation(@NotNull String numClient, @NotNull YearMonth month, @NotNull OutputStream out) throws ModelProviderException {
+        Client client = clientProvider.getClient(numClient);
         ZoneOffset zoneOffset = OffsetDateTime.now(ZoneId.systemDefault()).getOffset();
         Date dateStart = Date.from(month.atDay(1).atStartOfDay().toInstant(zoneOffset));
         Date dateEnd = Date.from(month.atEndOfMonth().atStartOfDay().toInstant(zoneOffset));
@@ -66,18 +73,31 @@ public class TransactionPdfGenerator implements ReleveOperationWriter {
 
         Document document = new Document(pdfDocument);
 
+        try {
+            PdfFont font = PdfFontFactory.createFont(StandardFonts.TIMES_ROMAN, "UTF-8");
+            document.setFont(font);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         // Add the date
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MMMM yyyy", Locale.FRENCH);
-        document.add(new Paragraph("Date: " + month.format(formatter)));
+        document.add(new Paragraph("Date: " + month.format(formatter)).setTextAlignment(TextAlignment.CENTER));
 
         // Add the client's phone number, name, gender, and current balance
         document.add(new Paragraph("Contact : " + client.numtel()));
         document.add(new Paragraph(client.nom()));
-        document.add(new Paragraph(client.sexe()));
-        document.add(new Paragraph("Solde actuel : %d %s".formatted(client.solde(), MONETARY_UNIT)));
+        document.add(new Paragraph(switch (client.sexe()) {
+            case "M" -> "Masculin";
+            case "F" -> "Féminin";
+            default -> "Autre";
+        }));
+        NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE);
+        String formattedSolde = "Solde actuel : %s %s".formatted(numberFormat.format(client.solde()), MONETARY_UNIT);
+        document.add(new Paragraph(formattedSolde));
 
         // Create a table and add the transactions to it
-        Table table = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1}));
+        Table table = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1})).setWidth(UnitValue.createPercentValue(100));
         table.addHeaderCell("Date");
         table.addHeaderCell("Raison");
         table.addHeaderCell("Nom du récepteur");
@@ -94,8 +114,8 @@ public class TransactionPdfGenerator implements ReleveOperationWriter {
         document.add(table);
 
         // Add the total
-        double total = transactions.stream().mapToDouble(Envoyer::montant).sum();
-        document.add(new Paragraph("Total: " + total));
+        double total = transactions.stream().mapToInt(Envoyer::montant).sum();
+        document.add(new Paragraph("Total: " + numberFormat.format(total)));
 
         document.close();
     }

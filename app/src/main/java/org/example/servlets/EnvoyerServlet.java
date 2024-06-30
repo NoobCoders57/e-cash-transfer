@@ -15,7 +15,6 @@ public class EnvoyerServlet {
 
     private EnvoyerDao envoyerDAO;
 
-
     public void init() {
         envoyerDAO = new EnvoyerDao();
     }

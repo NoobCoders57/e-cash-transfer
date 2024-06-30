@@ -20,7 +20,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class TransactionPdfGeneratorTest {
@@ -67,7 +66,7 @@ class TransactionPdfGeneratorTest {
         void testWithValidInputs() throws IOException, ModelProviderException {
             when(envoyerProvider.sentTransactions(any(), any(), any())).thenReturn(List.of(envoyer));
             generator = new TransactionPdfGenerator(envoyerProvider, clientProvider);
-            assertDoesNotThrow(() -> generator.writeReleveOperation(client, month, out));
+            assertDoesNotThrow(() -> generator.writeReleveOperation("client", month, out));
             verify(envoyerProvider, atLeastOnce()).sentTransactions(any(), any(), any());
             verify(out, atLeastOnce()).write(any(byte[].class), anyInt(), anyInt());
         }
@@ -76,39 +75,32 @@ class TransactionPdfGeneratorTest {
         void testWithNoTransactions() throws IOException, ModelProviderException {
             when(envoyerProvider.sentTransactions(any(), any(), any())).thenReturn(List.of());
             generator = new TransactionPdfGenerator(envoyerProvider, clientProvider);
-            assertDoesNotThrow(() -> generator.writeReleveOperation(client, month, out));
+            assertDoesNotThrow(() -> generator.writeReleveOperation("client", month, out));
             verify(out, atLeastOnce()).write(any(byte[].class), anyInt(), anyInt());
-            verify(clientProvider, never()).getClient(any());
+            verify(clientProvider, atMostOnce()).getClient(any());
         }
 
         @Test
         void testWithMultipleTransactions() throws ModelProviderException {
             when(envoyerProvider.sentTransactions(any(), any(), any())).thenReturn(List.of(envoyer, envoyer));
             generator = new TransactionPdfGenerator(envoyerProvider, clientProvider);
-            assertDoesNotThrow(() -> generator.writeReleveOperation(client, month, out));
+            assertDoesNotThrow(() -> generator.writeReleveOperation("client", month, out));
             verify(envoyerProvider, atLeastOnce()).sentTransactions(any(), any(), any());
             verify(envoyer, atLeast(2)).numRecepteur();
         }
 
         @SuppressWarnings("DataFlowIssue")
         @Test
-        void testWithNullClient() {
-            generator = new TransactionPdfGenerator(envoyerProvider, clientProvider);
-            assertThrows(NullPointerException.class, () -> generator.writeReleveOperation(null, month, out));
-        }
-
-        @SuppressWarnings("DataFlowIssue")
-        @Test
         void testWithNullMonth() {
             generator = new TransactionPdfGenerator(envoyerProvider, clientProvider);
-            assertThrows(NullPointerException.class, () -> generator.writeReleveOperation(client, null, out));
+            assertThrows(NullPointerException.class, () -> generator.writeReleveOperation("client", null, out));
         }
 
         @SuppressWarnings("DataFlowIssue")
         @Test
         void testWithNullOutputStream() {
             generator = new TransactionPdfGenerator(envoyerProvider, clientProvider);
-            assertThrows(NullPointerException.class, () -> generator.writeReleveOperation(client, month, null));
+            assertThrows(NullPointerException.class, () -> generator.writeReleveOperation("client", month, null));
         }
     }
 }

@@ -57,7 +57,7 @@ public class ClientServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         try {
             insertClient(req, resp);
         } catch (SQLException e) {
