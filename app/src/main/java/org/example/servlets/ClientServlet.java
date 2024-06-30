@@ -83,7 +83,7 @@ public class ClientServlet extends HttpServlet {
     private void updateClient(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         String originalNumtel = request.getParameter("originalNumtel");
         Client client = getClientFromParams(request);
-        clientDAO.updateClient(originalNumtel, client);
+        clientDAO.updateClient(client);
         response.sendRedirect("client");
     }
 

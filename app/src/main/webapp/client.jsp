@@ -271,8 +271,8 @@
         $('.edit-btn').on('click', function() {
             const button = $(this);
             $('#formAction').val('update');
-            $('#originalNumtel').val(button.data('numtel'));
             $('#numtel').val(button.data('numtel'));
+            $('#numtel').prop('readonly', true);
             $('#nom').val(button.data('nom'));
             // Sélectionner le sexe correspondant
             const sexe = button.data('sexe');

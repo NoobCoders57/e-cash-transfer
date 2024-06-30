@@ -84,7 +84,7 @@
             <table id="EnvoyerTable" class="table table-striped  mx-auto w-100">
                 <thead>
                 <tr>
-                    <th>Id Envoyer</th>
+                    <th>Id</th>
                     <th>Envoyeur</th>
                     <th>Récepteur</th>
                     <th>Montant</th>
