@@ -37,7 +37,7 @@ public class EnvoyerDao extends AbstractDao {
         return listEnvoyer;
     }
 
-    public void insertEnvoyer(Envoyer envoyer) throws SQLException {
+    public void insertEnvoyer(@NotNull Envoyer envoyer) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("INSERT INTO ENVOYER (numEnvoyeur, numRecepteur, montant, date, raison) VALUES (?, ?, ?, ?, ?)")) {
             pstmt.setString(1, envoyer.numEnvoyeur());
@@ -72,7 +72,7 @@ public class EnvoyerDao extends AbstractDao {
         return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison);
     }
 
-    public void updateEnvoyer(Envoyer envoyer) throws SQLException {
+    public void updateEnvoyer(@NotNull Envoyer envoyer) throws SQLException {
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement("UPDATE ENVOYER SET numEnvoyeur = ?, numRecepteur = ?, montant = ?, raison = ? WHERE idEnv = ?")) {
             pstmt.setString(1, envoyer.numEnvoyeur());
             pstmt.setString(2, envoyer.numRecepteur());

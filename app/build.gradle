@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'jakarta.servlet:jakarta.servlet-api:4.0.3'
+    implementation 'jakarta.servlet:jakarta.servlet-api:4.0.4'
     implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:2.3.6'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
     implementation 'javax.mail:mail:1.4'
@@ -27,6 +27,7 @@ dependencies {
     implementation 'org.jetbrains:annotations:24.1.0'
     implementation 'com.itextpdf:itext7-core:8.0.4'
     implementation 'org.apache.commons:commons-text:1.12.0'
+    implementation 'com.google.code.gson:gson:2.10'
 
     testImplementation 'org.projectlombok:lombok:1.18.32'
 

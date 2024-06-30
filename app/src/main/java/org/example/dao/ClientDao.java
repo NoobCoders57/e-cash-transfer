@@ -78,10 +78,20 @@ public class ClientDao extends AbstractDao {
         }
     }
 
+
     public void deleteClient(String numtel) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM CLIENT WHERE numtel = ?")) {
             pstmt.setString(1, numtel);
+            pstmt.executeUpdate();
+        }
+    }
+
+    public void updateSolde(String numtel, int newSolde) throws SQLException {
+        try (Connection conn = connect();
+             PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET solde = ? WHERE numtel = ?")) {
+            pstmt.setInt(1, newSolde);
+            pstmt.setString(2, numtel);
             pstmt.executeUpdate();
         }
     }
