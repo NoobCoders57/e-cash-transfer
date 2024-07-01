@@ -67,7 +67,7 @@ public class TransactionPdfGenerator implements ReleveOperationWriter {
         Client client = clientProvider.getClient(numClient);
         ZoneOffset zoneOffset = OffsetDateTime.now(ZoneId.systemDefault()).getOffset();
         Date dateStart = Date.from(month.atDay(1).atStartOfDay().toInstant(zoneOffset));
-        Date dateEnd = Date.from(month.atEndOfMonth().atStartOfDay().toInstant(zoneOffset));
+        Date dateEnd = Date.from(month.atEndOfMonth().atTime(23, 59).toInstant(zoneOffset));
         List<Envoyer> transactions = envoyerProvider.sentTransactions(client.numtel(), dateStart, dateEnd);
         PdfDocument pdfDocument = new PdfDocument(new PdfWriter(out));
 

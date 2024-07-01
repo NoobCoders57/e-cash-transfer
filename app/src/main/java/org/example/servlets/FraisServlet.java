@@ -30,11 +30,7 @@ public class FraisServlet extends HttpServlet {
         String action = request.getParameter("action");
         if (action == null || "list".equals(action)) {
             try {
-                if ("list".equals(action)) {
-                    listFrais(request, response);
-                } else {
-                    response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
-                }
+                listFrais(request, response);
             } catch (SQLException e) {
                 throw new ServletException(e);
             }
@@ -44,6 +40,8 @@ public class FraisServlet extends HttpServlet {
             } catch (SQLException e) {
                 throw new ServletException(e);
             }
+        } else {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
         }
     }
 

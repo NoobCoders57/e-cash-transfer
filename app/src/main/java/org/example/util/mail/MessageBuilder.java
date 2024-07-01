@@ -1,13 +1,19 @@
 package org.example.util.mail;
 
+import org.example.dao.FraisDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
 import org.example.util.interfaces.MailTemplateLoader;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 /**
  * Build the message to be sent by email
@@ -39,7 +45,8 @@ public class MessageBuilder {
             "nom",
             "num",
             "date",
-            "raison"
+            "raison",
+            "frais"
     };
     private final HashMap<MessageType, HashMap<String, String>> data = new HashMap<>();
 
@@ -51,7 +58,7 @@ public class MessageBuilder {
      * @param receiver       Receiver of the transaction
      * @param templateLoader A functional interface that provides the template to be used
      */
-    public MessageBuilder(@NotNull Envoyer transaction, Client sender, Client receiver, MailTemplateLoader templateLoader) {
+    public MessageBuilder(@NotNull Envoyer transaction, Client sender, Client receiver, MailTemplateLoader templateLoader) throws SQLException {
         this.templateLoader = templateLoader;
 
         HashMap<String, String> receiverData = new HashMap<>();
@@ -61,7 +68,8 @@ public class MessageBuilder {
         receiverData.put("num", transaction.numRecepteur());
         receiverData.put("date", transaction.date().toString());
         receiverData.put("raison", transaction.raison());
-        data.put(MessageType.CASH_RECEIVED, receiverData);
+        receiverData.put("frais", String.valueOf(new FraisDao().getFraisValueForMontant(transaction.montant())));
+        data.put(MessageType.CASH_SENT, receiverData);
 
         HashMap<String, String> senderData = new HashMap<>();
         senderData.put("montant", String.valueOf(transaction.montant()));
@@ -70,10 +78,11 @@ public class MessageBuilder {
         senderData.put("num", transaction.numEnvoyeur());
         senderData.put("date", transaction.date().toString());
         senderData.put("raison", transaction.raison());
-        data.put(MessageType.CASH_SENT, senderData);
+        senderData.put("frais", String.valueOf(new FraisDao().getFraisValueForMontant(transaction.montant())));
+        data.put(MessageType.CASH_RECEIVED, senderData);
     }
 
-    public MessageBuilder(@NotNull Envoyer transaction, Client sender, Client receiver) {
+    public MessageBuilder(@NotNull Envoyer transaction, Client sender, Client receiver) throws SQLException {
         this(transaction, sender, receiver, new DefaultMailTemplateLoader());
     }
 
@@ -101,8 +110,8 @@ public class MessageBuilder {
             String template = "templates/mail/%s.html".formatted(type.value());
             try (InputStream inputStream = loader.getResourceAsStream(template)) {
                 if (inputStream != null) {
-                    byte[] bytes = inputStream.readAllBytes();
-                    return new String(bytes);
+                    InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+                    return new BufferedReader(reader).lines().collect(Collectors.joining("\n"));
                 } else throw new RuntimeException("Could not load the template file" + template);
             }
         }

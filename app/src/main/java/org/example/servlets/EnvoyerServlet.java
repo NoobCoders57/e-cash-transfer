@@ -10,12 +10,16 @@ import org.example.dao.EnvoyerDao;
 import org.example.dao.FraisDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
+import org.example.util.exceptions.ModelProviderException;
+import org.example.util.interfaces.ObservableMailNotifier;
+import org.example.util.mail.MailNotifier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 @WebServlet("/envoyer")
 public class EnvoyerServlet extends HttpServlet {
@@ -49,7 +53,7 @@ public class EnvoyerServlet extends HttpServlet {
     }
 
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(@NotNull HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         if (action == null) {
             action = "list";
@@ -62,7 +66,7 @@ public class EnvoyerServlet extends HttpServlet {
                 case "delete" -> deleteEnvoyer(request, response);
                 default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid action");
             }
-        } catch (SQLException e) {
+        } catch (SQLException | ModelProviderException e) {
             throw new ServletException(e);
         }
     }
@@ -76,7 +80,7 @@ public class EnvoyerServlet extends HttpServlet {
         request.getRequestDispatcher("/envoyer.jsp").forward(request, response);
     }
 
-    private void insertEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+    private void insertEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException, ModelProviderException {
         int idEnv = 0; // Fake idEnv
         Envoyer newEnvoyer = getEnvoyerFromRequestParams(request, idEnv);
 
@@ -97,6 +101,25 @@ public class EnvoyerServlet extends HttpServlet {
         int newRecepteurSolde = recepteur.solde() + newEnvoyer.montant();
         clientDao.updateSolde(newEnvoyer.numEnvoyeur(), newEnvoyeurSolde);
         clientDao.updateSolde(newEnvoyer.numRecepteur(), newRecepteurSolde);
+
+        // Send mail to récepteur and envoyeur and log success/failure
+        MailNotifier mailNotifier = new MailNotifier(newEnvoyer);
+        mailNotifier.setSendListener(
+                ObservableMailNotifier.EventType.SEND_SUCCESS,
+                (message) -> Logger.getLogger(getClass().getName()).info("Mail sent to recepteur: " + message)
+        );
+        mailNotifier.setSendListener(
+                ObservableMailNotifier.EventType.SEND_FAILURE,
+                (message) -> Logger.getLogger(getClass().getName()).warning("Failed to send mail to recepteur: " + message)
+        );
+        Thread receiverThread = mailNotifier.notify(MailNotifier.Party.CASH_RECEIVER);
+        Thread senderThread = mailNotifier.notify(MailNotifier.Party.CASH_SENDER);
+        try {
+            receiverThread.join();
+            senderThread.join();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         response.sendRedirect("envoyer");
     }
@@ -130,7 +153,7 @@ public class EnvoyerServlet extends HttpServlet {
         response.sendRedirect("envoyer");
     }
 
-    private static @NotNull Envoyer getEnvoyerFromRequestParams(HttpServletRequest request, int idEnv) {
+    private static @NotNull Envoyer getEnvoyerFromRequestParams(@NotNull HttpServletRequest request, int idEnv) {
         Date date = new Date();
         String numEnvoyeur = request.getParameter("numEnvoyeur");
         String numRecepteur = request.getParameter("numRecepteur");
@@ -139,7 +162,7 @@ public class EnvoyerServlet extends HttpServlet {
         return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison);
     }
 
-    private void deleteEnvoyer(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+    private void deleteEnvoyer(@NotNull HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
         int idEnv = Integer.parseInt(request.getParameter("idenv"));
         Envoyer envoyer = envoyerDAO.getEnvoyer(idEnv);
         if (envoyer == null) {
