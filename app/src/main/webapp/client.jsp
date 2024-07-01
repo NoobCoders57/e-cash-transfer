@@ -117,6 +117,12 @@
                                     data-target="#clientModal">
                                 <i class="bi bi-pen-fill"></i>
                             </button>
+                            <button class="btn btn-info btn-sm rounded-circle gen-pdf-btn"
+                                    data-numtel="<c:out value='${client.numtel()}'/>"
+                                    data-toggle="modal"
+                                    data-target="#monthYearModal">
+                                <i class="bi bi-file-earmark-text-fill"></i>
+                            </button>
                             <button class="btn btn-danger btn-sm delete-btn rounded-circle"
                                     data-numtel="<c:out value='${client.numtel()}'/>"
                                     data-nom="<c:out value='${client.nom()}'/>"
@@ -212,7 +218,6 @@
         </div>
     </div>
 </div>
-</div>
 
 <!-- Modal for Delete Confirmation -->
 <div class="modal fade" id="deleteConfirmationModal">
@@ -238,6 +243,41 @@
                     <button type="submit" class="btn btn-danger">Supprimer</button>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
                 </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Month/Year Selection -->
+<div class="modal fade" id="monthYearModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Générer un relevé d'opération</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <form id="monthYearForm">
+                    <div class="form-group">
+                        <label for="numtel_modal">Numéro de téléphone :</label>
+                        <input type="text" class="form-control" id="numtel_modal" name="numtel" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label for="monthYear">Mois :</label>
+                        <input type="month" class="form-control" id="monthYear" name="monthYear" required>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="genPdfButton" data-dismiss="modal">Save</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
 
         </div>
@@ -305,6 +345,32 @@
             $('#clientNameToDelete').text(nom);
             $('#deleteNumtel').val(numtel);
         });
+
+        // Ouvrir le formulaire modal pour générer le relevé d'opération
+        $('.gen-pdf-btn').on('click', function() {
+            const button = $(this);
+            $('#numtel_modal').val(button.data('numtel'));
+        });
+
+        // Soumettre le formulaire pour générer le relevé d'opération
+        $('#genPdfButton').on('click', function() {
+            $('#monthYearForm').submit();
+        });
+
+        // Nettoyer le formulaire de suppression à sa fermeture
+        $('#deleteConfirmationModal').on('hidden.bs.modal', function () {
+            $('#deleteForm')[0].reset();
+        });
+
+        // Redirect to pdf generation servlet
+        $('#monthYearForm').on('submit', function(e) {
+            e.preventDefault();
+            const numtel = $('#numtel_modal').val();
+            const [year, month] = $('#monthYear').val().split('-');
+            console.log(month, year);
+            window.location.href = 'gen-pdf?client=' + numtel + '&month=' + month + '&year=' + year;
+        });
+
     });
 </script>
 </body>

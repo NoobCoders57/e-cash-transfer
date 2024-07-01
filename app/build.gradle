@@ -21,7 +21,7 @@ dependencies {
     implementation 'jakarta.servlet:jakarta.servlet-api:4.0.4'
     implementation 'jakarta.servlet.jsp:jakarta.servlet.jsp-api:2.3.6'
     implementation 'org.glassfish.web:jakarta.servlet.jsp.jstl:2.0.0'
-    implementation 'javax.mail:mail:1.4'
+    implementation 'javax.mail:mail:1.4.5'
     implementation 'org.postgresql:postgresql:42.7.3'
     implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'org.jetbrains:annotations:24.1.0'

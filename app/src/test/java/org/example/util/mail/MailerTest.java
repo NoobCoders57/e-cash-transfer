@@ -45,6 +45,12 @@ public class MailerTest {
         @Test
         public void shouldSucceedWhenGivenValidParameters() throws MessagingException {
             doNothing().when(transportProvider).send(any(MimeMessage.class));
+            when(session.getProperties()).thenReturn(new Properties() {{
+                setProperty("mail.smtp.host", "smtp.example.com");
+                setProperty("mail.smtp.port", "587");
+                setProperty("mail.smtp.auth", "true");
+                setProperty("mail.smtp.starttls.enable", "true");
+            }});
             when(sessionProvider.getSession(any(Properties.class), any(Authenticator.class))).thenReturn(session);
 
             new Mailer(
@@ -59,6 +65,12 @@ public class MailerTest {
         @Test
         public void shouldThrowMessagingExceptionWhenTransportFails() throws MessagingException {
             doThrow(MessagingException.class).when(transportProvider).send(any(MimeMessage.class));
+            when(session.getProperties()).thenReturn(new Properties() {{
+                setProperty("mail.smtp.host", "smtp.example.com");
+                setProperty("mail.smtp.port", "587");
+                setProperty("mail.smtp.auth", "true");
+                setProperty("mail.smtp.starttls.enable", "true");
+            }});
             when(sessionProvider.getSession(any(Properties.class), any(Authenticator.class))).thenReturn(session);
 
             assertThrows(

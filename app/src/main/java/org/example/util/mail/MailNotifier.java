@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
@@ -82,9 +83,9 @@ public class MailNotifier implements ObservableMailNotifier {
      *
      * @param party Party to be notified
      */
-    public void notify(Party party) {
+    public Thread notify(Party party) {
         MessageBuilder.MessageType messageType = messageTypeMapping.get(party);
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             String mail = clients.get(party).mail();
             try {
                 String message = new MessageBuilder(
@@ -96,10 +97,14 @@ public class MailNotifier implements ObservableMailNotifier {
                 notifySendListener(EventType.SEND_SUCCESS, "Email sent to " + mail);
                 Logger.getLogger("MailNotifier").info("Email sent to " + mail);
             } catch (MessagingException | IOException e) {
-                Logger.getLogger("MailNotifier").severe("Sending email failed: " + e.getMessage());
+                Logger.getLogger("MailNotifier").severe("Sending email failed: " + e);
                 notifySendListener(EventType.SEND_FAILURE, "Failed to send email to " + mail);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-        }).start();
+        });
+        thread.start();
+        return thread;
     }
 
     /**

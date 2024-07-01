@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -42,26 +43,11 @@ public class MessageBuilderTest {
     }
 
     @Test
-    public void shouldBuildCorrectCashReceivedMessage() throws IOException {
+    public void shouldBuildCorrectCashReceivedMessage() throws IOException, SQLException {
         Envoyer transaction = new Envoyer(sender.numtel(), receiver.numtel(), 400, new Date(), "Test");
         when(templateLoader.loadTemplate(MessageBuilder.MessageType.CASH_RECEIVED)).thenReturn("${nom} ${num} ${montant} ${unite} ${date} ${raison}");
         MessageBuilder messageBuilder = new MessageBuilder(transaction, sender, receiver, templateLoader);
         String message = messageBuilder.buildMessage(MessageBuilder.MessageType.CASH_RECEIVED);
-
-        assertEquals(
-                "%s %s %s %s %s %s".formatted(
-                        receiver.nom(), transaction.numRecepteur(), transaction.montant(), unite, date, transaction.raison()
-                ),
-                message
-        );
-
-    }
-
-    @Test
-    public void shouldBuildCorrectCashSentMessage() throws IOException {
-        when(templateLoader.loadTemplate(MessageBuilder.MessageType.CASH_SENT)).thenReturn("${nom} ${num} ${montant} ${unite} ${date} ${raison}");
-        MessageBuilder messageBuilder = new MessageBuilder(transaction, sender, receiver, templateLoader);
-        String message = messageBuilder.buildMessage(MessageBuilder.MessageType.CASH_SENT);
 
         assertEquals(
                 "%s %s %s %s %s %s".formatted(
@@ -72,7 +58,21 @@ public class MessageBuilderTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenTemplateNotFound() throws IOException {
+    public void shouldBuildCorrectCashSentMessage() throws IOException, SQLException {
+        when(templateLoader.loadTemplate(MessageBuilder.MessageType.CASH_SENT)).thenReturn("${nom} ${num} ${montant} ${unite} ${date} ${raison}");
+        MessageBuilder messageBuilder = new MessageBuilder(transaction, sender, receiver, templateLoader);
+        String message = messageBuilder.buildMessage(MessageBuilder.MessageType.CASH_SENT);
+
+        assertEquals(
+                "%s %s %s %s %s %s".formatted(
+                        receiver.nom(), transaction.numRecepteur(), transaction.montant(), unite, date, transaction.raison()
+                ),
+                message
+        );
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenTemplateNotFound() throws IOException, SQLException {
         when(templateLoader.loadTemplate(MessageBuilder.MessageType.CASH_SENT)).thenThrow(new RuntimeException("Could not load the template file"));
         MessageBuilder messageBuilder = new MessageBuilder(transaction, sender, receiver, templateLoader);
 
