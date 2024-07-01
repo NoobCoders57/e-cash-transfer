@@ -1,16 +1,16 @@
 package org.example.util.mail;
 
+import org.example.dao.ClientDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
+import org.example.util.exceptions.ModelProviderException;
 import org.example.util.interfaces.ClientProvider;
 import org.example.util.interfaces.MailCompleteListener;
 import org.example.util.interfaces.MailSender;
 import org.example.util.interfaces.ObservableMailNotifier.EventType;
 import org.example.util.mail.MailNotifier.Party;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.example.util.providers.DefaultClientProvider;
+import org.junit.jupiter.api.*;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -52,7 +52,7 @@ class MailNotifierTest {
     @Nested
     class NotifyTests {
         @BeforeEach
-        void setUp() throws SQLException {
+        void setUp() throws ModelProviderException {
             when(clientProvider.getClient(any())).thenReturn(client);
             when(client.mail()).thenReturn("test@example.com");
             when(client.nom()).thenReturn("Test");
@@ -64,7 +64,7 @@ class MailNotifierTest {
         }
 
         @Test
-        void shouldNotifyListenerOnSuccessfulEmailSend() throws SQLException {
+        void shouldNotifyListenerOnSuccessfulEmailSend() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             notifier.setSendListener(EventType.SEND_SUCCESS, listener);
             notifier.notify(Party.CASH_SENDER);
@@ -73,7 +73,7 @@ class MailNotifierTest {
         }
 
         @Test
-        void shouldNotifyListenerOnFailedEmailSend() throws SQLException, MessagingException {
+        void shouldNotifyListenerOnFailedEmailSend() throws MessagingException, ModelProviderException {
             doThrow(MessagingException.class).when(mailer).send(anyString(), anyString(), anyString());
 
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, mailer);
@@ -84,7 +84,7 @@ class MailNotifierTest {
         }
 
         @Test
-        void shouldNotNotifyListenerWhenRemoved() throws SQLException {
+        void shouldNotNotifyListenerWhenRemoved() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             notifier.setSendListener(EventType.SEND_SUCCESS, listener);
             notifier.removeSendListener(EventType.SEND_SUCCESS);
@@ -97,7 +97,7 @@ class MailNotifierTest {
     @Nested
     class NotifySendListenerTests {
         @Test
-        void shouldNotifyListenerOnSuccessEvent() throws SQLException {
+        void shouldNotifyListenerOnSuccessEvent() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             notifier.setSendListener(EventType.SEND_SUCCESS, listener);
             notifier.notifySendListener(EventType.SEND_SUCCESS, "Test message");
@@ -105,7 +105,7 @@ class MailNotifierTest {
         }
 
         @Test
-        void shouldNotifyListenerOnFailureEvent() throws SQLException {
+        void shouldNotifyListenerOnFailureEvent() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             notifier.setSendListener(EventType.SEND_FAILURE, listener);
             notifier.notifySendListener(EventType.SEND_FAILURE, "Test message");
@@ -116,7 +116,7 @@ class MailNotifierTest {
     @Nested
     class SetSendListenerTests {
         @Test
-        void shouldSetListenerForEventType() throws SQLException {
+        void shouldSetListenerForEventType() throws ModelProviderException {
             for (EventType eventType : EventType.values()) {
                 MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
                 notifier.setSendListener(eventType, listener);
@@ -127,7 +127,7 @@ class MailNotifierTest {
         }
 
         @Test
-        void shouldNotSetListenerForNullEventType() throws SQLException {
+        void shouldNotSetListenerForNullEventType() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             notifier.setSendListener(null, listener);
             MailCompleteListener actualListener = notifier.getSendListener(null);
@@ -139,7 +139,7 @@ class MailNotifierTest {
     @Nested
     class GetSendListenerTests {
         @Test
-        void shouldReturnListenerForEventType() throws SQLException {
+        void shouldReturnListenerForEventType() throws ModelProviderException {
             for (EventType eventType : EventType.values()) {
                 MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
                 notifier.setSendListener(eventType, listener);
@@ -150,7 +150,7 @@ class MailNotifierTest {
         }
 
         @Test
-        void shouldReturnNullForNonExistentEventType() throws SQLException {
+        void shouldReturnNullForNonExistentEventType() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             MailCompleteListener actualListener = notifier.getSendListener(null);
 
@@ -161,7 +161,7 @@ class MailNotifierTest {
     @Nested
     class RemoveSendListenerTests {
         @Test
-        void shouldRemoveListenerForEventType() throws SQLException {
+        void shouldRemoveListenerForEventType() throws ModelProviderException {
             for (EventType eventType : EventType.values()) {
                 MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
                 notifier.setSendListener(eventType, listener);
@@ -174,7 +174,7 @@ class MailNotifierTest {
 
         @SuppressWarnings("DataFlowIssue")
         @Test
-        void shouldNotRemoveListenerForNonExistentEventType() throws SQLException {
+        void shouldNotRemoveListenerForNonExistentEventType() throws ModelProviderException {
             MailNotifier notifier = new MailNotifier(transaction, clientProvider, (_, _, _) -> {});
             notifier.removeSendListener(null);
 
@@ -182,6 +182,33 @@ class MailNotifierTest {
                 MailCompleteListener actualListener = notifier.getSendListener(eventType);
                 assert actualListener == null;
             }
+        }
+    }
+
+    @Nested
+    class DefaultClientProviderTests {
+        @Test
+        void shouldCreateDefaultClientProvider() {
+            ClientDao clientDao = mock(ClientDao.class);
+            ClientProvider provider = new DefaultClientProvider(clientDao);
+            Assertions.assertNotNull(provider);
+        }
+
+        @Test
+        void shouldReturnClientFromClientDao() throws ModelProviderException, SQLException {
+            ClientDao clientDao = mock(ClientDao.class);
+            ClientProvider provider = new DefaultClientProvider(clientDao);
+            when(clientDao.getClient(any())).thenReturn(client);
+            Client actualClient = provider.getClient("1234567890");
+            assert actualClient == client;
+        }
+
+        @Test
+        void shouldThrowModelProviderExceptionOnSQLException() throws SQLException {
+            ClientDao clientDao = mock(ClientDao.class);
+            ClientProvider provider = new DefaultClientProvider(clientDao);
+            when(clientDao.getClient(any())).thenThrow(SQLException.class);
+            Assertions.assertThrows(ModelProviderException.class, () -> provider.getClient("1234567890"));
         }
     }
 }

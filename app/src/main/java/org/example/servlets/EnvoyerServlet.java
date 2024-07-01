@@ -90,7 +90,7 @@ public class EnvoyerServlet extends HttpServlet {
         }
 
         envoyerDAO.insertEnvoyer(newEnvoyer);
-        
+
         // Updating solde of envoyeur and recepteur
         int fraisValueForMontant = new FraisDao().getFraisValueForMontant(newEnvoyer.montant());
         int newEnvoyeurSolde = envoyeur.solde() - newEnvoyer.montant() - fraisValueForMontant;
