@@ -7,6 +7,7 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <!DOCTYPE html>
 <html>
@@ -23,10 +24,13 @@
 
     <style>
         #sidebar-wrapper {
-            width: 220px; /* Élargir le sidebar */
-            justify-content: center;
-            height: 100vh; /* Hauteur primaire */
-            background-color: #40A578; /* Couleur de fond primaire */
+            position: fixed;
+            width: 220px;
+            height: 100vh;
+            background-color: #40A578;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
         .list-group-item-action:hover {
@@ -65,6 +69,9 @@
         #EnvoyerTable td {
             text-align: left;
         }
+        #page-content-wrapper {
+            margin-left: 240px;
+        }
 
     </style>
 </head>
@@ -84,7 +91,7 @@
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
-                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Envoyer</a>
+                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Transaction</a>
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
@@ -94,7 +101,7 @@
         </div>
     </div>
 
-    <div>
+    <div id="page-content-wrapper">
         <div class="container ml-5">
             <button type="button" class="btn btn-primary mb-4 mt-5" data-toggle="modal" data-target="#envoyerModal">
                 Ajouter <i class="bi bi-arrow-left-right"></i>
@@ -102,11 +109,11 @@
             <table id="EnvoyerTable" class="table table-striped  mx-auto w-100">
                 <thead>
                 <tr>
-                    <th>Id</th>
+                    <th style="width: 50px;">Id</th>
                     <th>Envoyeur</th>
                     <th>Récepteur</th>
                     <th>Montant</th>
-                    <th>Date</th>
+                    <th style="width: 250px;">Date</th>
                     <th>Raison</th>
                     <th>Actions</th>
                 </tr>
@@ -118,7 +125,7 @@
                         <td><c:out value="${envoyer.numEnvoyeur()}"/></td>
                         <td><c:out value="${envoyer.numRecepteur()}"/></td>
                         <td><c:out value="${envoyer.montant()}"/></td>
-                        <td><c:out value="${envoyer.date()}"/></td>
+                        <td><fmt:formatDate value="${envoyer.date()}" pattern="dd MMMM yyyy ' , ' HH:mm"/></td>
                         <td><c:out value="${envoyer.raison()}"/></td>
                         <td class="pl-4">
                             <button class="btn btn-warning btn-sm edit-btn rounded-circle"
@@ -196,7 +203,7 @@
                     </div>
                     <div class="form-group">
                         <label for="montant">Montant:</label>
-                        <input type="number" class="form-control" id="montant" name="montant" required>
+                        <input type="number" min="0" class="form-control" id="montant" name="montant" required>
                     </div>
                     <div class="form-group">
                         <label for="date">Date:</label>
@@ -272,6 +279,8 @@
 
         $('#EnvoyerTable').DataTable({
             "pagingType": "simple_numbers",
+            "pageLength": 8, // Nombre d'enregistrements à afficher par défaut
+            "lengthMenu": [5, 8, 10, 15], // Options de pagination
             "language": {
                 "lengthMenu": "Afficher _MENU_ enregistrements par page",
                 "zeroRecords": "Aucun enregistrement trouvé",
@@ -304,14 +313,19 @@
         });
 
         // Ouvrir le formulaire modal pour l'édition
-        $('.edit-btn').on('click', function () {
+        $(document).on('click', '.edit-btn', function (){
             const button = $(this);
             $('#formAction').val('update');
             $('#idenv').val(button.data('idenv'));
             $('#numEnvoyeur').val(button.data('numenvoyeur'));
             $('#numRecepteur').val(button.data('numrecepteur'));
             $('#montant').val(button.data('montant'));
-            $('#date').val(button.data('date'));
+
+            // Formater la date pour le champ datetime-local
+            const date = new Date(button.data('date'));
+            const formattedDate = date.toISOString().slice(0, 16); // Convertir en format YYYY-MM-DDTHH:MM
+            $('#date').val(formattedDate);
+
             $('#raison').val(button.data('raison'));
 
             // Mettre à jour le solde de l'envoyeur
@@ -350,7 +364,7 @@
         });
 
         // Afficher la boîte de dialogue de confirmation de suppression
-        $('.delete-btn').on('click', function () {
+        $(document).on('click', '.delete-btn', function () {
             const button = $(this);
             const idenv = button.data('idenv');
             $('#deleteIdenv').val(idenv);

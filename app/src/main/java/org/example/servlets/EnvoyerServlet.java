@@ -179,13 +179,6 @@ public class EnvoyerServlet extends HttpServlet {
             return;
         }
 
-        // Adjusting solde of envoyeur and recepteur
-        int montant = envoyer.montant();
-        int newEnvoyeurSolde = envoyeur.solde() + montant; // Reverting envoyeur's solde
-        int newRecepteurSolde = recepteur.solde() - montant; // Reverting recepteur's solde
-        clientDao.updateSolde(envoyeur.numtel(), newEnvoyeurSolde);
-        clientDao.updateSolde(recepteur.numtel(), newRecepteurSolde);
-
         // Deleting Envoyer
         envoyerDAO.deleteEnvoyer(idEnv);
         response.sendRedirect("envoyer");
