@@ -5,7 +5,7 @@ public record Client(
         String nom,
         String sexe,
         String pays,
-        int solde,
+        float solde,
         String mail
 ) {
     public Client {

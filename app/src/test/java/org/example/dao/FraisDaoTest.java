@@ -49,7 +49,7 @@ class FraisDaoTest {
     class InsertFrais {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            fraisDao.insertFrais(new Frais(1, 1, 1000, 10));
+            fraisDao.insertFrais(new Frais("france-1", 1, 1000, 10));
             verify(preparedStatement).executeUpdate();
         }
     }
@@ -58,7 +58,7 @@ class FraisDaoTest {
     class GetFrais {
         @Test
         void shouldCallExecuteQuery() throws SQLException {
-            fraisDao.getFrais(1);
+            Frais _ = fraisDao.getFrais("france-1");
             verify(preparedStatement).executeQuery();
         }
     }
@@ -67,7 +67,7 @@ class FraisDaoTest {
     class DeleteFrais {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            fraisDao.deleteFrais(1);
+            fraisDao.deleteFrais("france1");
             verify(preparedStatement).executeUpdate();
         }
     }
@@ -76,7 +76,7 @@ class FraisDaoTest {
     class UpdateFrais {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            fraisDao.updateFrais(new Frais(1, 1, 1000, 10));
+            fraisDao.updateFrais(new Frais("france-2", 1, 1000, 10));
             verify(preparedStatement).executeUpdate();
         }
     }

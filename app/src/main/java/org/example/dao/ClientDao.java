@@ -27,7 +27,7 @@ public class ClientDao extends AbstractDao {
                 String nom = rs.getString("nom");
                 String sexe = rs.getString("sexe");
                 String pays = rs.getString("pays");
-                int solde = rs.getInt("solde");
+                float solde = rs.getFloat("solde");
                 String mail = rs.getString("mail");
                 listClients.add(new Client(numtel, nom, sexe, pays, solde, mail));
             }
@@ -41,7 +41,7 @@ public class ClientDao extends AbstractDao {
             pstmt.setString(2, client.nom());
             pstmt.setString(3, client.sexe());
             pstmt.setString(4, client.pays());
-            pstmt.setInt(5, client.solde());
+            pstmt.setFloat(5, client.solde());
             pstmt.setString(6, client.mail());
             pstmt.executeUpdate();
         }
@@ -57,7 +57,7 @@ public class ClientDao extends AbstractDao {
                 String nom = rs.getString("nom");
                 String sexe = rs.getString("sexe");
                 String pays = rs.getString("pays");
-                int solde = rs.getInt("solde");
+                float solde = rs.getFloat("solde");
                 String mail = rs.getString("mail");
                 client = new Client(numtel, nom, sexe, pays, solde, mail);
             }
@@ -71,7 +71,7 @@ public class ClientDao extends AbstractDao {
             pstmt.setString(1, client.nom());
             pstmt.setString(2, client.sexe());
             pstmt.setString(3, client.pays());
-            pstmt.setInt(4, client.solde());
+            pstmt.setFloat(4, client.solde());
             pstmt.setString(5, client.mail());
             pstmt.setString(6, client.numtel());
             pstmt.executeUpdate();
@@ -87,10 +87,10 @@ public class ClientDao extends AbstractDao {
         }
     }
 
-    public void updateSolde(String numtel, int newSolde) throws SQLException {
+    public void updateSolde(String numtel, float newSolde) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("UPDATE CLIENT SET solde = ? WHERE numtel = ?")) {
-            pstmt.setInt(1, newSolde);
+            pstmt.setFloat(1, newSolde);
             pstmt.setString(2, numtel);
             pstmt.executeUpdate();
         }

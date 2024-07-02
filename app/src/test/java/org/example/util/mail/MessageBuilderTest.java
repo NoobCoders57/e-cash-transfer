@@ -32,8 +32,8 @@ public class MessageBuilderTest {
     public void setup() {
         mocks = MockitoAnnotations.openMocks(this);
         date = new Date();
-        sender = new Client("123", "Sender", "Male", "Antananarivo", 1000, "test@site.com");
-        receiver = new Client("456", "Receiver", "Male", "Antananarivo", 10000, "test2@site.com");
+        sender = new Client("123", "Sender", "Male", "Madagascar", 1000, "test@site.com");
+        receiver = new Client("456", "Receiver", "Male", "Madagascar", 10000, "test2@site.com");
         transaction = new Envoyer(sender.numtel(), receiver.numtel(), 400, date, "Test");
     }
 

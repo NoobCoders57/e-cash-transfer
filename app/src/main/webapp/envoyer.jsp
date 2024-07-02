@@ -8,7 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-
+<fmt:setLocale value="fr_FR"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -124,8 +124,8 @@
                         <td><c:out value="${envoyer.idEnv()}"/></td>
                         <td><c:out value="${envoyer.numEnvoyeur()}"/></td>
                         <td><c:out value="${envoyer.numRecepteur()}"/></td>
-                        <td><c:out value="${envoyer.montant()}"/></td>
-                        <td><fmt:formatDate value="${envoyer.date()}" pattern="dd MMMM yyyy ' , ' HH:mm"/></td>
+                        <td><fmt:formatNumber value="${envoyer.montant()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
+                        <td><fmt:formatDate value="${envoyer.date()}" pattern="dd MMMM yyyy, HH:mm"/></td>
                         <td><c:out value="${envoyer.raison()}"/></td>
                         <td class="pl-4">
                             <button class="btn btn-warning btn-sm edit-btn rounded-circle"
@@ -156,7 +156,7 @@
 
             <h4>
                 <i class="bi bi-bank2 m-3"></i>
-                RECETTE : <c:out value="${recette}"/> MGA
+                RECETTE : <fmt:formatNumber value="${recette}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/> MGA
             </h4>
         </div>
     </div>
@@ -196,8 +196,9 @@
                         <label for="numRecepteur">Récepteur:</label>
                         <select class="form-control" id="numRecepteur" name="numRecepteur" required>
                             <c:forEach var="client" items="${listClients}">
-                                <option value="<c:out value='${client.numtel()}'/>"><c:out
-                                        value='${client.nom()}'/></option>
+                                <option value="<c:out value='${client.numtel()}'/>">
+                                    <c:out value='${client.nom()}'/>
+                                </option>
                             </c:forEach>
                         </select>
                     </div>
@@ -336,9 +337,10 @@
         async function checkSoldeAndSubmit() {
             var montant = parseInt($('#montant').val());
             var soldeEnvoyeur = parseInt($('#soldeEnvoyeur').val());
+            let numEnvoyeur = $('#numEnvoyeur').val();
 
             console.log($('#soldeEnvoyeur').val());
-            $.get('/app/frais?action=get_frais&montant=' + montant, function (data) {
+            $.get('/app/frais?action=get_frais&montant=' + montant + "&client=" + numEnvoyeur, function (data) {
                 montant += parseInt(data['frais']);
                 // Vérifier si le montant est supérieur au solde de l'envoyeur
                 if (montant > soldeEnvoyeur) {

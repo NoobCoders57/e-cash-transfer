@@ -44,14 +44,11 @@ public class ClientServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
         try {
-            if ("insert".equals(action)) {
-                insertClient(request, response);
-            } else if ("update".equals(action)) {
-                updateClient(request, response);
-            } else if ("delete".equals(action)) {
-                deleteClient(request, response);
-            } else {
-                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
+            switch (action) {
+                case "insert" -> insertClient(request, response);
+                case "update" -> updateClient(request, response);
+                case "delete" -> deleteClient(request, response);
+                case null, default -> response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Unknown action");
             }
         } catch (SQLException e) {
             throw new ServletException(e);
@@ -75,7 +72,7 @@ public class ClientServlet extends HttpServlet {
         String nom = request.getParameter("nom");
         String sexe = request.getParameter("sexe");
         String pays = request.getParameter("pays");
-        int solde = Integer.parseInt(request.getParameter("solde"));
+        float solde = Float.parseFloat(request.getParameter("solde"));
         String mail = request.getParameter("mail");
         return new Client(numtel, nom, sexe, pays, solde, mail);
     }

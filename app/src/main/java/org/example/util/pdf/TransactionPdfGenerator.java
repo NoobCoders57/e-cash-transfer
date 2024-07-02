@@ -93,10 +93,14 @@ public class TransactionPdfGenerator implements ReleveOperationWriter {
             default -> "Autre";
         }));
         NumberFormat numberFormat = NumberFormat.getNumberInstance(Locale.FRANCE);
+        numberFormat.setMinimumFractionDigits(2);
+        numberFormat.setMaximumFractionDigits(2);
+        numberFormat.setGroupingUsed(true);
         String formattedSolde = "Solde actuel : %s %s".formatted(numberFormat.format(client.solde()), MONETARY_UNIT);
         document.add(new Paragraph(formattedSolde));
 
-        // Create a table and add the transactions to it
+        // Create a table an
+        // d add the transactions to it
         Table table = new Table(UnitValue.createPercentArray(new float[]{1, 1, 1, 1})).setWidth(UnitValue.createPercentValue(100));
         table.addHeaderCell("Date");
         table.addHeaderCell("Raison");
@@ -114,8 +118,8 @@ public class TransactionPdfGenerator implements ReleveOperationWriter {
         document.add(table);
 
         // Add the total
-        double total = transactions.stream().mapToInt(Envoyer::montant).sum();
-        document.add(new Paragraph("Total: " + numberFormat.format(total)));
+        double total = transactions.stream().mapToDouble(Envoyer::montant).sum();
+        document.add(new Paragraph("Total : " + numberFormat.format(total)));
 
         document.close();
     }

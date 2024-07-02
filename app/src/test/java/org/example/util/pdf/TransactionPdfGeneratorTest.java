@@ -44,10 +44,10 @@ class TransactionPdfGeneratorTest {
         when(client.nom()).thenReturn("John Doe");
         when(client.numtel()).thenReturn("123456789");
         when(client.sexe()).thenReturn("Masculin");
-        when(client.solde()).thenReturn(1000);
+        when(client.solde()).thenReturn(1000f);
 
         when(envoyer.numRecepteur()).thenReturn("987654321");
-        when(envoyer.montant()).thenReturn(500);
+        when(envoyer.montant()).thenReturn(500f);
         when(envoyer.date()).thenReturn(new Date());
         when(envoyer.raison()).thenReturn("Test");
 
