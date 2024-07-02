@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.dao.ClientDao;
 import org.example.models.Client;
+import org.example.util.mail.MessageBuilder;
 
 import java.io.IOException;
 import java.sql.SQLException;

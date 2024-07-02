@@ -6,6 +6,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <meta charset="UTF-8"/>
     <title>Clients</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link href="https://cdn.datatables.net/1.11.3/css/dataTables.bootstrap4.min.css" rel="stylesheet">
@@ -102,7 +103,7 @@
                     <th>Pays</th>
                     <th>Solde</th>
                     <th>Mail</th>
-                    <th>Actions</th>
+                    <th style="width: 200px;">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -112,8 +113,16 @@
                         <td><c:out value="${client.nom()}"/></td>
                         <td><c:out value="${client.sexe()}"/></td>
                         <td><c:out value="${client.pays()}"/></td>
-                        <td><fmt:formatNumber value="${client.solde()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
-                        <td><c:out value="${client.mail()}"/></td>
+                        <td>
+                            <fmt:formatNumber value="${client.solde()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/>
+                            <c:choose>
+                                <c:when test="${client.pays().toLowerCase() == 'france'}">&euro;</c:when>
+                                <c:when test="${client.pays().toLowerCase() == 'usa'}">$</c:when>
+                                <c:when test="${client.pays().toLowerCase() == 'madagascar'}">Ar</c:when>
+                                <c:otherwise>Other Currency</c:otherwise>
+                            </c:choose>
+                        </td>
+                        <td><c:out value="${client.mail()}"/> </td>
                         <td class="pl-4">
                             <button class="btn btn-warning btn-sm edit-btn rounded-circle"
                                     data-numtel="<c:out value='${client.numtel()}'/>"
@@ -156,7 +165,7 @@
 
             <!-- Modal Header -->
             <div class="modal-header">
-                <h4 class="modal-title">Client Form</h4>
+                <h4 class="modal-title">Client</h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
 
@@ -370,6 +379,7 @@
             let table = $('#clientsTable').DataTable();
             let found = false;
             let numtel = $('#numtel').val();
+            let action = $('#formAction').val();
             table.rows().every(function () {
                 // Get the data for the first column of this row
                 let cellData = this.data()[0];
@@ -381,7 +391,7 @@
                     // You can add more actions here if a match is found
                 }
             });
-            if (found) {
+            if (found && action === "insert") {
                 $('#numtelExistsModal').modal('show');
             } else {
                 $('#clientForm').submit();

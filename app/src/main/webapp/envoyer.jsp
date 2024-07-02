@@ -124,7 +124,26 @@
                         <td><c:out value="${envoyer.idEnv()}"/></td>
                         <td><c:out value="${envoyer.numEnvoyeur()}"/></td>
                         <td><c:out value="${envoyer.numRecepteur()}"/></td>
-                        <td><fmt:formatNumber value="${envoyer.montant()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
+                        <td>
+                            <fmt:formatNumber value="${envoyer.montant()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/>
+                            <c:set var="currency" value="Other Currency"/>
+                            <c:forEach var="client" items="${listClients}">
+                                <c:if test="${client.numtel() == envoyer.numEnvoyeur()}">
+                                    <c:choose>
+                                        <c:when test="${client.pays().toLowerCase() == 'france'}">
+                                            <c:set var="currency" value="&euro;"/>
+                                        </c:when>
+                                        <c:when test="${client.pays().toLowerCase() == 'usa'}">
+                                            <c:set var="currency" value="$"/>
+                                        </c:when>
+                                        <c:when test="${client.pays().toLowerCase() == 'madagascar'}">
+                                            <c:set var="currency" value="Ar"/>
+                                        </c:when>
+                                    </c:choose>
+                                </c:if>
+                            </c:forEach>
+                                ${currency}
+                        </td>
                         <td><fmt:formatDate value="${envoyer.date()}" pattern="dd MMMM yyyy, HH:mm"/></td>
                         <td><c:out value="${envoyer.raison()}"/></td>
                         <td class="pl-4">
