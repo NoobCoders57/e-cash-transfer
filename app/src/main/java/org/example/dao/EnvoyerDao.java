@@ -66,7 +66,7 @@ public class EnvoyerDao extends AbstractDao {
         String numEnvoyeur = rs.getString("numEnvoyeur");
         String numRecepteur = rs.getString("numRecepteur");
         int montant = rs.getInt("montant");
-        Date date = rs.getDate("date");
+        Date date = rs.getTimestamp("date");
         String raison = rs.getString("raison");
         int idEnv = rs.getInt("idEnv");
         return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison);

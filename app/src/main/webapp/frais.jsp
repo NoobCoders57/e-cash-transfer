@@ -77,7 +77,7 @@
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
-                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Envoyer</a>
+                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Transaction</a>
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
@@ -151,16 +151,20 @@
                     <input type="hidden" id="formAction" name="action" value="insert">
                     <input type="hidden" id="idfrais" name="idfrais">
                     <div class="form-group">
+                        <label for="Pays">Pays:</label>
+                        <input type="text" class="form-control" id="Pays" name="Pays" required>
+                    </div>
+                    <div class="form-group">
                         <label for="montant1">Montant 1:</label>
-                        <input type="number" class="form-control" id="montant1" name="montant1">
+                        <input type="number" min="0" class="form-control" id="montant1" name="montant1">
                     </div>
                     <div class="form-group">
                         <label for="montant2">Montant 2:</label>
-                        <input type="number" class="form-control" id="montant2" name="montant2">
+                        <input type="number" min="0" class="form-control" id="montant2" name="montant2">
                     </div>
                     <div class="form-group">
                         <label for="frais">Frais:</label>
-                        <input type="number" class="form-control" id="frais" name="frais">
+                        <input type="number" min="0" class="form-control" id="frais" name="frais">
                     </div>
                 </form>
             </div>

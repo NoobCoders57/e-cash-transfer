@@ -17,13 +17,16 @@
 
     <style>
         #sidebar-wrapper {
+            position: fixed;
             width: 220px;
-            justify-content: center;
             height: 100vh;
             background-color: #40A578;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
         .list-group-item-action:hover {
-            background-color: rgb(167, 237, 206, 0.3);
+            background-color: rgba(167, 237, 206, 0.3);
             border-radius: 10px;
             color: ghostwhite;
         }
@@ -42,7 +45,7 @@
             padding: 0 1rem;
         }
         hr {
-            border: 2px solid rgb(167, 237, 206, 0.3);
+            border: 2px solid rgba(167, 237, 206, 0.3);
             border-radius: 25px;
         }
         #clientsTable th {
@@ -51,6 +54,10 @@
         }
         #clientsTable td {
             text-align: left;
+        }
+        #page-content-wrapper {
+            margin-left: 220px;
+            padding: 20px;
         }
     </style>
 </head>
@@ -68,7 +75,7 @@
                 <hr class="mt-2 mb-2 w-75">
             </div>
             <div>
-                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Envoyer</a>
+                <a href="envoyer" class="list-group-item list-group-item-action"><i class="bi bi-send-fill"></i> &nbsp;Transaction</a>
                 <hr class="mt-2 mb-2 w-75">
             </div>
             <div>
