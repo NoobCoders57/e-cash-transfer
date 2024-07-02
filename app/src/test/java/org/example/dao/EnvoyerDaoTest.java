@@ -48,7 +48,7 @@ class EnvoyerDaoTest {
     class InsertEnvoyer {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            clientDao.insertEnvoyer(new Envoyer(1, "1234567890", "0987654321", 1000, new Date(), "Test"));
+            clientDao.insertEnvoyer(new Envoyer("1234567890", "0987654321", 1000, new Date(), "Test"));
             verify(preparedStatement, times(1)).executeUpdate();
         }
     }
@@ -75,7 +75,7 @@ class EnvoyerDaoTest {
     class UpdateEnvoyer {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            clientDao.updateEnvoyer(new Envoyer(1, "1234567890", "0987654321", 1000, new Date(), "Test"));
+            clientDao.updateEnvoyer(new Envoyer("1234567890", "0987654321", 1000, new Date(), "Test"));
             verify(preparedStatement, times(1)).executeUpdate();
         }
     }

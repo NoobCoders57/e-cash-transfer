@@ -1,5 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="fr_FR"/>
 
 <!DOCTYPE html>
 <html>
@@ -110,7 +112,7 @@
                         <td><c:out value="${client.nom()}"/></td>
                         <td><c:out value="${client.sexe()}"/></td>
                         <td><c:out value="${client.pays()}"/></td>
-                        <td><c:out value="${client.solde()}"/></td>
+                        <td><fmt:formatNumber value="${client.solde()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
                         <td><c:out value="${client.mail()}"/></td>
                         <td class="pl-4">
                             <button class="btn btn-warning btn-sm edit-btn rounded-circle"
@@ -291,6 +293,30 @@
     </div>
 </div>
 
+<!-- Modal for Numtel Exists -->
+<div class="modal fade" id="numtelExistsModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <h4 class="modal-title">Numéro de téléphone existant</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="modal-body">
+                <p>Un client avec ce numéro de téléphone existe déjà.</p>
+            </div>
+
+            <!-- Modal Footer -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+
+        </div>
+    </div>
+</div>
 <!-- JavaScript pour la confirmation de suppression -->
 <script>
     $(document).ready(function() {
@@ -341,7 +367,25 @@
 
         // Soumettre le formulaire client
         $('#saveClientBtn').on('click', function() {
-            $('#clientForm').submit();
+            let table = $('#clientsTable').DataTable();
+            let found = false;
+            let numtel = $('#numtel').val();
+            table.rows().every(function () {
+                // Get the data for the first column of this row
+                let cellData = this.data()[0];
+
+                // Check if the cell data is equal to idTaux
+                if (cellData === numtel) {
+                    console.log('A row with idTaux in the first column was found.');
+                    found = true;
+                    // You can add more actions here if a match is found
+                }
+            });
+            if (found) {
+                $('#numtelExistsModal').modal('show');
+            } else {
+                $('#clientForm').submit();
+            }
         });
 
         // Afficher la boîte de dialogue de confirmation de suppression

@@ -46,9 +46,21 @@ class TauxDaoTest {
     class InsertTaux {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            Taux taux = new Taux(1, 1, 3000);
+            Taux taux = new Taux("france", "madagascar", 1, 3000);
             tauxDao.insertTaux(taux);
             verify(preparedStatement).executeUpdate();
+        }
+
+        @Test
+        void shouldCallTauxMethods() throws SQLException {
+            Taux taux = mock(Taux.class);
+            when(taux.idTaux()).thenReturn("france-madagascar");
+            when(taux.montant1()).thenReturn(1.0f);
+            when(taux.montant2()).thenReturn(3000.f);
+            tauxDao.insertTaux(taux);
+            verify(taux).idTaux();
+            verify(taux).montant1();
+            verify(taux).montant2();
         }
     }
 
@@ -56,8 +68,8 @@ class TauxDaoTest {
     class GetTaux {
         @Test
         void shouldCallExecuteQuery() throws SQLException {
-            tauxDao.getTaux(1);
-            verify(preparedStatement).executeQuery();
+            Taux _ = tauxDao.getTaux("france", "madagascar");
+            verify(preparedStatement, atLeastOnce()).executeQuery();
         }
     }
 
@@ -65,9 +77,21 @@ class TauxDaoTest {
     class UpdateTaux {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            Taux taux = new Taux(1, 1, 3000);
+            Taux taux = new Taux("france", "madagascar", 1, 3000);
             tauxDao.updateTaux(taux);
             verify(preparedStatement).executeUpdate();
+        }
+
+        @Test
+        void shouldCallTauxMethods() throws SQLException {
+            Taux taux = mock(Taux.class);
+            when(taux.idTaux()).thenReturn("france-madagascar");
+            when(taux.montant1()).thenReturn(1.0f);
+            when(taux.montant2()).thenReturn(3000f);
+            tauxDao.insertTaux(taux);
+            verify(taux).idTaux();
+            verify(taux).montant1();
+            verify(taux).montant2();
         }
     }
 
@@ -75,7 +99,7 @@ class TauxDaoTest {
     class DeleteTaux {
         @Test
         void shouldCallExecuteUpdate() throws SQLException {
-            tauxDao.deleteTaux(1);
+            tauxDao.deleteTaux("france-madagascar");
             verify(preparedStatement).executeUpdate();
         }
     }

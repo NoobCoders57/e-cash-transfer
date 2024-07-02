@@ -42,7 +42,7 @@ public class EnvoyerDao extends AbstractDao {
              PreparedStatement pstmt = conn.prepareStatement("INSERT INTO ENVOYER (numEnvoyeur, numRecepteur, montant, date, raison) VALUES (?, ?, ?, ?, ?)")) {
             pstmt.setString(1, envoyer.numEnvoyeur());
             pstmt.setString(2, envoyer.numRecepteur());
-            pstmt.setInt(3, envoyer.montant());
+            pstmt.setFloat(3, envoyer.montant());
             pstmt.setTimestamp(4, new Timestamp(envoyer.date().getTime()));
             pstmt.setString(5, envoyer.raison());
             pstmt.executeUpdate();
@@ -65,24 +65,31 @@ public class EnvoyerDao extends AbstractDao {
     private static @NotNull Envoyer getEnvoyerFromResultSet(@NotNull ResultSet rs) throws SQLException {
         String numEnvoyeur = rs.getString("numEnvoyeur");
         String numRecepteur = rs.getString("numRecepteur");
-        int montant = rs.getInt("montant");
+        float montant = rs.getFloat("montant");
         Date date = rs.getTimestamp("date");
         String raison = rs.getString("raison");
         int idEnv = rs.getInt("idEnv");
-        return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison);
+        String pays = new ClientDao().getClient(numEnvoyeur).pays();
+        float frais = new FraisDao().getFraisValueForMontant(montant, pays);
+        return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison, frais);
     }
 
     public void updateEnvoyer(@NotNull Envoyer envoyer) throws SQLException {
         try (Connection conn = connect(); PreparedStatement pstmt = conn.prepareStatement("UPDATE ENVOYER SET numEnvoyeur = ?, numRecepteur = ?, montant = ?, raison = ? WHERE idEnv = ?")) {
             pstmt.setString(1, envoyer.numEnvoyeur());
             pstmt.setString(2, envoyer.numRecepteur());
-            pstmt.setInt(3, envoyer.montant());
+            pstmt.setFloat(3, envoyer.montant());
             pstmt.setString(4, envoyer.raison());
             pstmt.setInt(5, envoyer.idEnv());
             pstmt.executeUpdate();
         }
     }
 
+    /**
+     * Delete a transaction
+     * @param idEnv the transaction ID
+     * @throws SQLException if a database access error occurs
+     */
     public void deleteEnvoyer(int idEnv) throws SQLException {
         try (Connection conn = connect();
              PreparedStatement pstmt = conn.prepareStatement("DELETE FROM ENVOYER WHERE idEnv = ?")) {

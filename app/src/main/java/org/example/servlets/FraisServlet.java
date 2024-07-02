@@ -6,6 +6,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.dao.ClientDao;
 import org.example.dao.FraisDao;
 import org.example.models.Frais;
 import org.jetbrains.annotations.NotNull;
@@ -46,11 +47,13 @@ public class FraisServlet extends HttpServlet {
     }
 
     private void getFraisForMontant(@NotNull HttpServletRequest request, @NotNull HttpServletResponse response) throws SQLException, IOException {
-        HashMap<String, Integer> hashMap = new HashMap<>();
-        int montant = Integer.parseInt(request.getParameter("montant"));
+        HashMap<String, Float> hashMap = new HashMap<>();
+        float montant = Float.parseFloat(request.getParameter("montant"));
+        String client = request.getParameter("client");
+        String pays = new ClientDao().getClient(client).pays();
 
         response.setContentType("application/json");
-        hashMap.put("frais", fraisDAO.getFraisValueForMontant(montant));
+        hashMap.put("frais", fraisDAO.getFraisValueForMontant(montant, pays));
         response.getWriter().println(new Gson().toJson(hashMap));
     }
 
@@ -84,20 +87,21 @@ public class FraisServlet extends HttpServlet {
     }
 
     private void insertFrais(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int montant1 = Integer.parseInt(request.getParameter("montant1"));
-        int montant2 = Integer.parseInt(request.getParameter("montant2"));
-        int frais = Integer.parseInt(request.getParameter("frais"));
+        float montant1 = Float.parseFloat(request.getParameter("montant1"));
+        float montant2 = Float.parseFloat(request.getParameter("montant2"));
+        String pays = request.getParameter("pays");
+        float frais = Float.parseFloat(request.getParameter("frais"));
 
-        Frais newFrais = new Frais(montant1, montant2, frais);
+        Frais newFrais = new Frais(pays, montant1, montant2, frais);
         fraisDAO.insertFrais(newFrais);
         response.sendRedirect("frais");
     }
 
     private void updateFrais(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int idfrais = Integer.parseInt(request.getParameter("idfrais"));
-        int montant1 = Integer.parseInt(request.getParameter("montant1"));
-        int montant2 = Integer.parseInt(request.getParameter("montant2"));
-        int frais = Integer.parseInt(request.getParameter("frais"));
+        String idfrais = request.getParameter("idfrais");
+        float montant1 = Float.parseFloat(request.getParameter("montant1"));
+        float montant2 = Float.parseFloat(request.getParameter("montant2"));
+        float frais = Float.parseFloat(request.getParameter("frais"));
 
         Frais updatedFrais = new Frais(idfrais, montant1, montant2, frais);
         fraisDAO.updateFrais(updatedFrais);
@@ -105,7 +109,7 @@ public class FraisServlet extends HttpServlet {
     }
 
     private void deleteFrais(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int idfrais = Integer.parseInt(request.getParameter("idfrais"));
+        String idfrais = request.getParameter("idfrais");
         fraisDAO.deleteFrais(idfrais);
         response.sendRedirect("frais");
     }

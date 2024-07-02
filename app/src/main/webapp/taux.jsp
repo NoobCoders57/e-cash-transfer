@@ -7,6 +7,8 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="fr_FR"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -27,14 +29,17 @@
             height: 100vh; /* Hauteur primaire */
             background-color: #40A578; /* Couleur de fond primaire */
         }
+
         .list-group-item-action:hover {
             background-color: rgb(167, 237, 206, 0.3); /* Changer le background en info au hover */
             border-radius: 10px;
-            color : ghostwhite;
+            color: ghostwhite;
         }
+
         .list-group-item i {
             margin-right: 5px;
         }
+
         .list-group-item {
             background-color: #40A578;
             color: whitesmoke;
@@ -43,21 +48,26 @@
             font-weight: bold;
             text-align: left;
         }
+
         .sidebar-content {
             padding: 0 1rem;
         }
-        hr{
+
+        hr {
             border: 2px solid rgb(167, 237, 206, 0.3);
             border-radius: 25px;
         }
-        #TauxTable th{
+
+        #TauxTable th {
             width: 120px;
             text-align: center;
         }
-        #TauxTable td{
+
+        #TauxTable td {
             text-align: center;
         }
-        .Contenu{
+
+        .Contenu {
             margin-left: 140px;
         }
 
@@ -70,11 +80,13 @@
     <div id="sidebar-wrapper">
         <div class="list-group list-group-flush sidebar-content">
             <div class="nav1 mt-5">
-                <a href="client" class="list-group-item list-group-item-action"><i class="bi bi-person-circle"></i>&nbsp; Clients</a>
+                <a href="client" class="list-group-item list-group-item-action"><i class="bi bi-person-circle"></i>&nbsp;
+                    Clients</a>
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
-                <a href="frais" class="list-group-item list-group-item-action"><i class="bi bi-coin"></i> &nbsp;Frais</a>
+                <a href="frais" class="list-group-item list-group-item-action"><i class="bi bi-coin"></i>
+                    &nbsp;Frais</a>
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
@@ -82,7 +94,8 @@
                 <hr class="mt-2 mb-2  w-75">
             </div>
             <div>
-                <a href="taux" class="list-group-item list-group-item-action"><i class="bi bi-currency-exchange mr-2"></i> Taux</a>
+                <a href="taux" class="list-group-item list-group-item-action"><i
+                        class="bi bi-currency-exchange mr-2"></i> Taux</a>
             </div>
         </div>
     </div>
@@ -105,11 +118,15 @@
                 <c:forEach var="taux" items="${listTaux}">
                     <tr>
                         <td>${taux.idTaux()}</td>
-                        <td>${taux.montant1()}</td>
-                        <td>${taux.montant2()}</td>
+                        <td><fmt:formatNumber value="${taux.montant1()}" type="number" maxFractionDigits="2"
+                                              minFractionDigits="2" groupingUsed="true"/></td>
+                        <td><fmt:formatNumber value="${taux.montant2()}" type="number" maxFractionDigits="2"
+                                              minFractionDigits="2" groupingUsed="true"/></td>
                         <td>
                             <button class="btn btn-warning btn-sm edit-btn rounded-circle"
                                     data-id="${taux.idTaux()}"
+                                    data-pays1="${taux.pays1()}"
+                                    data-pays2="${taux.pays2()}"
                                     data-montant1="${taux.montant1()}"
                                     data-montant2="${taux.montant2()}"
                                     data-toggle="modal"
@@ -146,14 +163,13 @@
             <div class="modal-body">
                 <form id="tauxForm" action="taux" method="post">
                     <input type="hidden" id="formAction" name="action" value="insert">
-                    <input type="hidden" id="idTaux" name="idTaux">
                     <div class="form-group">
-                        <label for="Pays1">Pays 1:</label>
-                        <input type="text" class="form-control" id="Pays1" name="Pays1" required>
+                        <label for="pays1">Pays 1:</label>
+                        <input type="text" class="form-control" id="pays1" name="pays1" required>
                     </div>
                     <div class="form-group">
-                        <label for="Pays2">Pays 2:</label>
-                        <input type="text" class="form-control" id="Pays2" name="Pays2" required>
+                        <label for="pays2">Pays 2:</label>
+                        <input type="text" class="form-control" id="pays2" name="pays2" required>
                     </div>
                     <div class="form-group">
                         <label for="montant1">Montant1:</label>
@@ -175,7 +191,23 @@
         </div>
     </div>
 </div>
-
+<!-- Modal for Taux Exists -->
+<div class="modal fade" id="idTauxExistsModal">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Taux existe</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Le taux d'échange existe déjà.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal for Delete Confirmation -->
 <div class="modal fade" id="deleteConfirmationModal">
     <div class="modal-dialog">
@@ -207,7 +239,7 @@
 </div>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('#TauxTable').DataTable({
             "pagingType": "simple_numbers",
             "language": {
@@ -226,10 +258,13 @@
             }
         });
         // Ouvrir le formulaire modal pour l'édition
-        $('.edit-btn').on('click', function() {
+        $('.edit-btn').on('click', function () {
             const button = $(this);
             $('#formAction').val('update');
-            $('#idTaux').val(button.data('id'));
+            $('#pays1').val(button.data('pays1'));
+            $('#pays1').prop('readonly', true);
+            $('#pays2').val(button.data('pays2'));
+            $('#pays2').prop('readonly', true);
             $('#montant1').val(button.data('montant1'));
             $('#montant2').val(button.data('montant2'));
         });
@@ -242,12 +277,30 @@
         });
 
         // Soumettre le formulaire de taux
-        $('#saveTauxBtn').on('click', function() {
-            $('#tauxForm').submit();
+        $('#saveTauxBtn').on('click', function () {
+            let idTaux = $("#pays1").val() + "-" + $("#pays2").val();
+            let table = $('#TauxTable').DataTable();
+            let found = false;
+            table.rows().every(function () {
+                // Get the data for the first column of this row
+                let cellData = this.data()[0];
+
+                // Check if the cell data is equal to idTaux
+                if (cellData === idTaux) {
+                    console.log('A row with idTaux in the first column was found.');
+                    found = true;
+                    // You can add more actions here if a match is found
+                }
+            });
+            if (found) {
+                $('#idTauxExistsModal').modal('show');
+            } else {
+                $('#tauxForm').submit();
+            }
         });
 
         // Afficher la boîte de dialogue de confirmation de suppression
-        $('.delete-btn').on('click', function() {
+        $('.delete-btn').on('click', function () {
             const button = $(this);
             $('#deleteIdTaux').val(button.data('id'));
         });

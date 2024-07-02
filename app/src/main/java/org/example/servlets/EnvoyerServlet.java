@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.example.dao.ClientDao;
 import org.example.dao.EnvoyerDao;
 import org.example.dao.FraisDao;
+import org.example.dao.TauxDao;
 import org.example.models.Client;
 import org.example.models.Envoyer;
 import org.example.util.exceptions.ModelProviderException;
@@ -96,9 +97,9 @@ public class EnvoyerServlet extends HttpServlet {
         envoyerDAO.insertEnvoyer(newEnvoyer);
 
         // Updating solde of envoyeur and recepteur
-        int fraisValueForMontant = new FraisDao().getFraisValueForMontant(newEnvoyer.montant());
-        int newEnvoyeurSolde = envoyeur.solde() - newEnvoyer.montant() - fraisValueForMontant;
-        int newRecepteurSolde = recepteur.solde() + newEnvoyer.montant();
+        float fraisValueForMontant = new FraisDao().getFraisValueForMontant(newEnvoyer.montant(), envoyeur.pays());
+        float newEnvoyeurSolde = envoyeur.solde() - newEnvoyer.montant() - fraisValueForMontant;
+        float newRecepteurSolde = recepteur.solde() + new TauxDao().convert(envoyeur.pays(), recepteur.pays(), newEnvoyer.montant());
         clientDao.updateSolde(newEnvoyer.numEnvoyeur(), newEnvoyeurSolde);
         clientDao.updateSolde(newEnvoyer.numRecepteur(), newRecepteurSolde);
 
@@ -112,14 +113,8 @@ public class EnvoyerServlet extends HttpServlet {
                 ObservableMailNotifier.EventType.SEND_FAILURE,
                 (message) -> Logger.getLogger(getClass().getName()).warning("Failed to send mail to recepteur: " + message)
         );
-        Thread receiverThread = mailNotifier.notify(MailNotifier.Party.CASH_RECEIVER);
-        Thread senderThread = mailNotifier.notify(MailNotifier.Party.CASH_SENDER);
-        try {
-            receiverThread.join();
-            senderThread.join();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        Thread _ = mailNotifier.notify(MailNotifier.Party.CASH_RECEIVER);
+        Thread _ = mailNotifier.notify(MailNotifier.Party.CASH_SENDER);
 
         response.sendRedirect("envoyer");
     }
@@ -137,16 +132,15 @@ public class EnvoyerServlet extends HttpServlet {
             return;
         }
 
-
         // Checking envoyeur's solde
         Envoyer oldEnvoyer = envoyerDAO.getEnvoyer(idEnv);
-        int oldMontant = oldEnvoyer.montant();
-        int diffMontant = envoyer.montant() - oldMontant;
+        float oldMontant = oldEnvoyer.montant();
+        float diffMontant = envoyer.montant() - oldMontant;
         envoyerDAO.updateEnvoyer(envoyer);
 
         // Adjusting solde of envoyeur and recepteur
-        int newEnvoyeurSolde = envoyeur.solde() - diffMontant;
-        int newRecepteurSolde = recepteur.solde() + diffMontant;
+        float newEnvoyeurSolde = envoyeur.solde() - diffMontant;
+        float newRecepteurSolde = recepteur.solde() + diffMontant;
         clientDao.updateSolde(envoyer.numEnvoyeur(), newEnvoyeurSolde);
         clientDao.updateSolde(envoyer.numRecepteur(), newRecepteurSolde);
 
@@ -157,9 +151,9 @@ public class EnvoyerServlet extends HttpServlet {
         Date date = new Date();
         String numEnvoyeur = request.getParameter("numEnvoyeur");
         String numRecepteur = request.getParameter("numRecepteur");
-        int montant = Integer.parseInt(request.getParameter("montant"));
+        float montant = Float.parseFloat(request.getParameter("montant"));
         String raison = request.getParameter("raison");
-        return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison);
+        return new Envoyer(idEnv, numEnvoyeur, numRecepteur, montant, date, raison, 0);
     }
 
     private void deleteEnvoyer(@NotNull HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
@@ -170,26 +164,17 @@ public class EnvoyerServlet extends HttpServlet {
             return;
         }
 
-        // Fetching client objects
-        Client envoyeur = clientDao.getClient(envoyer.numEnvoyeur());
-        Client recepteur = clientDao.getClient(envoyer.numRecepteur());
-
-        if (envoyeur == null || recepteur == null) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid clients");
-            return;
-        }
-
         // Deleting Envoyer
         envoyerDAO.deleteEnvoyer(idEnv);
         response.sendRedirect("envoyer");
     }
 
-    private int getRecette() throws SQLException {
+    private float getRecette() throws SQLException {
         List<Envoyer> listEnvoyer = envoyerDAO.listAllEnvois();
-        FraisDao fraisDao = new FraisDao();
-        int recette = 0;
+        float recette = 0;
         for (Envoyer envoyer : listEnvoyer) {
-            recette += fraisDao.getFraisValueForMontant(envoyer.montant());
+            String pays = clientDao.getClient(envoyer.numEnvoyeur()).pays();
+            recette += new TauxDao().convert(pays, "madagascar", envoyer.frais());
         }
         return recette;
     }

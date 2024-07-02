@@ -18,7 +18,7 @@ public class TauxServlet extends HttpServlet {
     private TauxDao tauxDAO;
 
     @Override
-    public void init() throws ServletException {
+    public void init() {
         tauxDAO = new TauxDao();
     }
 
@@ -70,26 +70,29 @@ public class TauxServlet extends HttpServlet {
     }
 
     private void insertTaux(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int montant1 = Integer.parseInt(request.getParameter("montant1"));
-        int montant2 = Integer.parseInt(request.getParameter("montant2"));
+        float montant1 = Float.parseFloat(request.getParameter("montant1"));
+        float montant2 = Float.parseFloat(request.getParameter("montant2"));
+        String pays1 = request.getParameter("pays1");
+        String pays2 = request.getParameter("pays2");
 
-        Taux newTaux = new Taux(montant1, montant2);
+        Taux newTaux = new Taux(pays1, pays2, montant1, montant2);
         tauxDAO.insertTaux(newTaux);
         response.sendRedirect("taux");
     }
 
     private void updateTaux(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int idTaux = Integer.parseInt(request.getParameter("idTaux"));
-        int montant1 = Integer.parseInt(request.getParameter("montant1"));
-        int montant2 = Integer.parseInt(request.getParameter("montant2"));
+        String pays1 = request.getParameter("pays1");
+        String pays2 = request.getParameter("pays2");
+        float montant1 = Float.parseFloat(request.getParameter("montant1"));
+        float montant2 = Float.parseFloat(request.getParameter("montant2"));
 
-        Taux taux = new Taux(idTaux, montant1, montant2);
+        Taux taux = new Taux(pays1, pays2, montant1, montant2);
         tauxDAO.updateTaux(taux);
         response.sendRedirect("taux");
     }
 
     private void deleteTaux(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-        int idTaux = Integer.parseInt(request.getParameter("idTaux"));
+        String idTaux = request.getParameter("idTaux");
         tauxDAO.deleteTaux(idTaux);
         response.sendRedirect("taux");
     }

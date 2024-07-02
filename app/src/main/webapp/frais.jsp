@@ -7,6 +7,8 @@
 --%>
 <%@ page contentType="text/html;charset=UTF-8" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<fmt:setLocale value="fr_FR"/>
 <!DOCTYPE html>
 <html>
 <head>
@@ -105,15 +107,16 @@
                 <c:forEach var="frais" items="${listFrais}">
                     <tr>
                         <td><c:out value="${frais.idFrais()}"/></td>
-                        <td><c:out value="${frais.montant1()}"/></td>
-                        <td><c:out value="${frais.montant2()}"/></td>
-                        <td><c:out value="${frais.frais()}"/></td>
+                        <td><fmt:formatNumber value="${frais.montant1()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
+                        <td><fmt:formatNumber value="${frais.montant2()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
+                        <td><fmt:formatNumber value="${frais.frais()}" type="number" maxFractionDigits="2" minFractionDigits="2" groupingUsed="true"/></td>
                         <td class="pl-5">
                             <button class="btn btn-warning btn-sm edit-btn rounded-circle"
                                     data-idfrais="<c:out value='${frais.idFrais()}'/>"
                                     data-montant1="<c:out value='${frais.montant1()}'/>"
                                     data-montant2="<c:out value='${frais.montant2()}'/>"
                                     data-frais="<c:out value='${frais.frais()}'/>"
+                                    data-pays="<c:out value='${frais.pays()}'/>"
                                     data-toggle="modal"
                                     data-target="#fraisModal">
                                 <i class="bi bi-pen-fill"></i>
@@ -151,8 +154,8 @@
                     <input type="hidden" id="formAction" name="action" value="insert">
                     <input type="hidden" id="idfrais" name="idfrais">
                     <div class="form-group">
-                        <label for="Pays">Pays:</label>
-                        <input type="text" class="form-control" id="Pays" name="Pays" required>
+                        <label for="pays">Pays:</label>
+                        <input type="text" class="form-control" id="pays" name="pays" required>
                     </div>
                     <div class="form-group">
                         <label for="montant1">Montant 1:</label>
@@ -233,6 +236,8 @@
             const button = $(this);
             $('#formAction').val('update');
             $('#idfrais').val(button.data('idfrais'));
+            $('#pays').val(button.data('pays'));
+            $('#pays').prop('readonly', true); // Empêcher la modification du pays (clé primaire)
             $('#montant1').val(button.data('montant1'));
             $('#montant2').val(button.data('montant2'));
             $('#frais').val(button.data('frais'));

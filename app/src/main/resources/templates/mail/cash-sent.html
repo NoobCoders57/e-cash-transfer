@@ -1,15 +1,17 @@
-<html>
+<html lang="fr">
     <head>
       <style> #title {text-align:center} </style>
       <meta charset="utf-8"/>
+      <title>Rapport de transaction</title>
     </head>
     <body>
-      <h3 id="title" text-align="center">Rapport de transaction</h3>
+      <h3 id="title" style="text-align: center">Rapport de transaction</h3>
       <p>Cher client, vous avez envoyé ${montant} ${unite} à ${nom} (${num}).</p>
       <h4>Résumé de la transaction : </h4>
       <p>Date : ${date}</p>
       <p>Montant : ${montant} ${unite}</p>
-      <p>Frais de transaction : ${frais}</p>
+      <p>Frais de transaction : ${frais} ${unite}</p>
       <p>Raison: ${raison}</p>
+      <p>Votre nouveau solde : ${solde} ${unite}</p>
     </body>
 </html>

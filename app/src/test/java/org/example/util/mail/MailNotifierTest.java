@@ -56,7 +56,8 @@ class MailNotifierTest {
             when(clientProvider.getClient(any())).thenReturn(client);
             when(client.mail()).thenReturn("test@example.com");
             when(client.nom()).thenReturn("Test");
-            when(transaction.montant()).thenReturn(1000);
+            when(client.pays()).thenReturn("france");
+            when(transaction.montant()).thenReturn(1000f);
             when(transaction.numEnvoyeur()).thenReturn("1234567890");
             when(transaction.numRecepteur()).thenReturn("0987654321");
             when(transaction.raison()).thenReturn("Test");
